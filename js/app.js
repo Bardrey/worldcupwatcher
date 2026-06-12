@@ -259,8 +259,11 @@
       const isRecommended = state.favouriteTeam && eventMatchesTeam(event, state.favouriteTeam) && state.currentTab !== 'favourites';
       const btnLabel = event.type === 'ticketed' ? 'GET TICKETS' : 'RSVP / INFO';
 
+      const venueImg = VENUE_IMAGES[event.venue] || null;
+
       html += `
         <div class="event-card${isRecommended ? ' recommended' : ''}" data-id="${event.id}">
+          ${venueImg ? `<div class="card-img"><img src="${venueImg}" alt="${event.venue}" loading="lazy"></div>` : ''}
           <div class="card-body">
             <div class="card-top">
               <span class="card-match">${matchLabelShort(event.matchId)}</span>
