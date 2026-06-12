@@ -1,0 +1,543 @@
+/* ============================================
+   WORLDCUPWATCHER — Main Application
+   ============================================ */
+
+(function () {
+  'use strict';
+
+  // ── State ──────────────────────────────────
+  let state = {
+    favouriteTeam: null,
+    currentTab: 'upcoming',
+    currentView: 'list',
+    currentFilter: 'all',
+    map: null,
+    markers: [],
+    shareEventId: null,
+  };
+
+  // ── Helpers ────────────────────────────────
+  function getTeam(code) {
+    return TEAMS_2026.find(t => t.code === code);
+  }
+
+  function getMatch(id) {
+    return MATCHES.find(m => m.id === id);
+  }
+
+  function matchLabel(matchId) {
+    const m = getMatch(matchId);
+    if (!m) return '';
+    const a = getTeam(m.teamA);
+    const b = getTeam(m.teamB);
+    return `${a?.flag || ''} ${a?.name || m.teamA} vs ${b?.name || m.teamB} ${b?.flag || ''}`;
+  }
+
+  function matchLabelShort(matchId) {
+    const m = getMatch(matchId);
+    if (!m) return '';
+    const a = getTeam(m.teamA);
+    const b = getTeam(m.teamB);
+    return `${a?.name || m.teamA} vs ${b?.name || m.teamB}`;
+  }
+
+  function formatDate(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+    return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]}`;
+  }
+
+  function isThisWeek(dateStr) {
+    const now = new Date();
+    const d = new Date(dateStr + 'T00:00:00');
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    startOfWeek.setHours(0, 0, 0, 0);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 7);
+    return d >= startOfWeek && d < endOfWeek;
+  }
+
+  function isMatchForTeam(matchId, teamCode) {
+    const m = getMatch(matchId);
+    return m && (m.teamA === teamCode || m.teamB === teamCode);
+  }
+
+  function eventMatchesTeam(event, teamCode) {
+    return isMatchForTeam(event.matchId, teamCode);
+  }
+
+  // ── LocalStorage ───────────────────────────
+  function loadTeam() {
+    return localStorage.getItem('wcw_team');
+  }
+
+  function saveTeam(code) {
+    localStorage.setItem('wcw_team', code);
+  }
+
+  // ── DOM Refs ───────────────────────────────
+  const $overlay = document.getElementById('team-select-overlay');
+  const $teamGrid = document.getElementById('team-grid');
+  const $teamSearch = document.getElementById('team-search');
+  const $skipTeam = document.getElementById('skip-team');
+  const $listView = document.getElementById('list-view');
+  const $mapView = document.getElementById('map-view');
+  const $eventList = document.getElementById('event-list');
+  const $noResults = document.getElementById('no-results');
+  const $btnListView = document.getElementById('btn-list-view');
+  const $btnMapView = document.getElementById('btn-map-view');
+  const $contentArea = document.getElementById('content-area');
+  const $matchHighlight = document.getElementById('match-highlight');
+  const $currentTeamFlag = document.getElementById('current-team-flag');
+  const $btnTeamChange = document.getElementById('btn-team-change');
+  const $shareModal = document.getElementById('share-modal');
+  const $mapCard = document.getElementById('map-card');
+
+  // ── Team Selection ─────────────────────────
+  function renderTeamGrid(filter = '') {
+    const filtered = TEAMS_2026.filter(t =>
+      t.name.toLowerCase().includes(filter.toLowerCase())
+    );
+    $teamGrid.innerHTML = filtered.map(t => `
+      <button class="team-card" data-code="${t.code}" aria-label="${t.name}">
+        <span class="flag">${t.flag}</span>
+        <span class="team-name">${t.name}</span>
+      </button>
+    `).join('');
+
+    $teamGrid.querySelectorAll('.team-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const code = card.dataset.code;
+        state.favouriteTeam = code;
+        saveTeam(code);
+        hideOverlay();
+        init();
+      });
+    });
+  }
+
+  function hideOverlay() {
+    $overlay.classList.add('hidden');
+    setTimeout(() => { $overlay.style.display = 'none'; }, 400);
+  }
+
+  function showOverlay() {
+    $overlay.style.display = 'flex';
+    $overlay.classList.remove('hidden');
+    renderTeamGrid();
+  }
+
+  $teamSearch.addEventListener('input', () => {
+    renderTeamGrid($teamSearch.value);
+  });
+
+  $skipTeam.addEventListener('click', () => {
+    hideOverlay();
+    init();
+  });
+
+  $btnTeamChange.addEventListener('click', () => {
+    showOverlay();
+  });
+
+  // ── View Toggle ────────────────────────────
+  $btnListView.addEventListener('click', () => switchView('list'));
+  $btnMapView.addEventListener('click', () => switchView('map'));
+
+  function switchView(view) {
+    state.currentView = view;
+    $btnListView.classList.toggle('active', view === 'list');
+    $btnMapView.classList.toggle('active', view === 'map');
+    $listView.hidden = view !== 'list';
+    $mapView.hidden = view !== 'map';
+
+    if (view === 'map') {
+      initMap();
+      renderMapMarkers();
+    }
+  }
+
+  // ── Filter Chips ───────────────────────────
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      state.currentFilter = chip.dataset.filter;
+      renderCurrentTab();
+    });
+  });
+
+  // ── Bottom Nav ─────────────────────────────
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+      state.currentTab = item.dataset.tab;
+      renderCurrentTab();
+    });
+  });
+
+  // ── Filtering & Sorting ────────────────────
+  function getFilteredEvents() {
+    let events = [...EVENTS];
+    const filter = state.currentFilter;
+
+    if (filter === 'free') events = events.filter(e => e.type === 'free');
+    else if (filter === 'ticketed') events = events.filter(e => e.type === 'ticketed');
+    else if (filter === 'fan-zone') events = events.filter(e => e.vibe === 'Fan Zone');
+    else if (filter === 'pub') events = events.filter(e => e.vibe === 'Pub');
+    else if (filter === 'rooftop') events = events.filter(e => e.vibe === 'Rooftop');
+    else if (filter === 'outdoor') events = events.filter(e => e.vibe === 'Outdoor');
+
+    if (state.currentTab === 'upcoming') {
+      events.sort((a, b) => {
+        const da = new Date(a.date + 'T' + a.time);
+        const db = new Date(b.date + 'T' + b.time);
+        return da - db;
+      });
+    } else if (state.currentTab === 'popular') {
+      const bigMatches = ['m4', 'm6', 'm11', 'm14', 'm26', 'm29', 'm35', 'm37', 'm39'];
+      events = events.filter(e => bigMatches.includes(e.matchId));
+      events.sort((a, b) => {
+        const capA = parseInt(a.capacity) || 0;
+        const capB = parseInt(b.capacity) || 0;
+        return capB - capA;
+      });
+    } else if (state.currentTab === 'favourites') {
+      if (state.favouriteTeam) {
+        events = events.filter(e => eventMatchesTeam(e, state.favouriteTeam));
+      } else {
+        events = [];
+      }
+    }
+
+    return events;
+  }
+
+  // ── Render Event List ──────────────────────
+  function renderEventList() {
+    const events = getFilteredEvents();
+
+    if (events.length === 0) {
+      $eventList.innerHTML = '';
+      $noResults.hidden = false;
+      if (state.currentTab === 'favourites' && !state.favouriteTeam) {
+        $noResults.innerHTML = `
+          <p>NO TEAM SELECTED</p>
+          <span>Pick your team to see recommended events</span>
+          <button onclick="document.getElementById('btn-team-change').click()"
+                  style="display:block;margin:16px auto 0;padding:10px 20px;background:var(--accent);color:var(--bg);border:none;border-radius:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:1px;cursor:pointer">
+            PICK A TEAM
+          </button>
+        `;
+      } else {
+        $noResults.innerHTML = '<p>NO EVENTS FOUND</p><span>Try changing your filters</span>';
+      }
+      return;
+    }
+
+    $noResults.hidden = true;
+    let html = '';
+    let lastDate = '';
+
+    if (state.currentTab === 'popular') {
+      html += `<div class="tab-header">BIG FIXTURES<span class="tab-count">${events.length} events</span></div>`;
+    } else if (state.currentTab === 'favourites') {
+      const team = getTeam(state.favouriteTeam);
+      html += `<div class="tab-header">${team?.flag || ''} ${team?.name?.toUpperCase() || 'YOUR TEAM'} MATCHES<span class="tab-count">${events.length} events</span></div>`;
+    }
+
+    events.forEach(event => {
+      if (event.date !== lastDate) {
+        lastDate = event.date;
+        html += `<div class="date-separator">${formatDate(event.date)}</div>`;
+      }
+
+      const match = getMatch(event.matchId);
+      const isRecommended = state.favouriteTeam && eventMatchesTeam(event, state.favouriteTeam) && state.currentTab !== 'favourites';
+      const btnLabel = event.type === 'ticketed' ? 'GET TICKETS' : 'RSVP / INFO';
+
+      html += `
+        <div class="event-card${isRecommended ? ' recommended' : ''}" data-id="${event.id}">
+          <div class="card-body">
+            <div class="card-top">
+              <span class="card-match">${matchLabelShort(event.matchId)}</span>
+              <span class="card-type-tag ${event.type}">${event.type === 'free' ? 'FREE' : event.price}</span>
+            </div>
+            <div class="card-venue">${event.venue}</div>
+            <div class="card-address">${event.address}</div>
+            <div class="card-meta">
+              <span class="meta-pill vibe">${event.vibe}</span>
+              <span class="meta-pill">${event.capacity} capacity</span>
+              ${match ? `<span class="meta-pill">${match.stage}</span>` : ''}
+            </div>
+            <div class="card-time">${formatDate(event.date)} &middot; Doors ${event.time}</div>
+            <p style="font-size:13px;color:var(--text-muted);margin-top:8px;line-height:1.5">${event.description}</p>
+            <div class="card-actions">
+              <a href="${event.link}" target="_blank" rel="noopener" class="card-btn primary">${btnLabel}</a>
+              <button class="card-btn secondary share-trigger" data-event-id="${event.id}">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M10.5 4.67a2.33 2.33 0 100-4.67 2.33 2.33 0 000 4.67zM3.5 9.33a2.33 2.33 0 100-4.67 2.33 2.33 0 000 4.67zM10.5 14a2.33 2.33 0 100-4.67 2.33 2.33 0 000 4.67zM5.57 8.23l2.87 1.87M8.43 3.9L5.57 5.77" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+                SHARE
+              </button>
+            </div>
+            <div class="card-source">via ${event.source}</div>
+          </div>
+        </div>
+      `;
+    });
+
+    $eventList.innerHTML = html;
+
+    document.querySelectorAll('.share-trigger').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openShareModal(btn.dataset.eventId);
+      });
+    });
+  }
+
+  // ── League Tables ──────────────────────────
+  function renderTables() {
+    let html = '<div class="tables-view">';
+
+    for (const [group, standings] of Object.entries(GROUP_STANDINGS)) {
+      html += `<div class="group-header">GROUP ${group}</div>`;
+      html += `
+        <div class="table-row header">
+          <span class="pos">#</span>
+          <span class="team-col">TEAM</span>
+          <span class="stat">P</span>
+          <span class="stat">W</span>
+          <span class="stat">D</span>
+          <span class="stat">GD</span>
+          <span class="pts">PTS</span>
+        </div>
+      `;
+
+      standings.forEach((row, i) => {
+        const team = getTeam(row.team);
+        const isHighlight = state.favouriteTeam && row.team === state.favouriteTeam;
+        html += `
+          <div class="table-row${isHighlight ? ' highlight-row' : ''}">
+            <span class="pos">${i + 1}</span>
+            <span class="team-col">
+              <span class="flag">${team?.flag || ''}</span>
+              <span class="name">${team?.name || row.team}</span>
+            </span>
+            <span class="stat">${row.p}</span>
+            <span class="stat">${row.w}</span>
+            <span class="stat">${row.d}</span>
+            <span class="stat">${row.gd > 0 ? '+' : ''}${row.gd}</span>
+            <span class="pts">${row.pts}</span>
+          </div>
+        `;
+      });
+    }
+
+    html += '</div>';
+    $eventList.innerHTML = html;
+    $noResults.hidden = true;
+  }
+
+  // ── Match Highlight Banner ─────────────────
+  function updateMatchHighlight() {
+    if (!state.favouriteTeam) {
+      $matchHighlight.hidden = true;
+      $contentArea.classList.remove('has-highlight');
+      return;
+    }
+
+    const team = getTeam(state.favouriteTeam);
+    const now = new Date();
+    const nextMatch = MATCHES
+      .filter(m => m.teamA === state.favouriteTeam || m.teamB === state.favouriteTeam)
+      .filter(m => new Date(m.date + 'T' + m.time) >= new Date(now.toDateString()))
+      .sort((a, b) => new Date(a.date + 'T' + a.time) - new Date(b.date + 'T' + b.time))[0];
+
+    if (!nextMatch) {
+      $matchHighlight.hidden = true;
+      $contentArea.classList.remove('has-highlight');
+      return;
+    }
+
+    const teamA = getTeam(nextMatch.teamA);
+    const teamB = getTeam(nextMatch.teamB);
+
+    document.getElementById('hl-team-a').textContent = `${teamA?.flag || ''} ${teamA?.name || nextMatch.teamA}`;
+    document.getElementById('hl-team-b').textContent = `${teamB?.name || nextMatch.teamB} ${teamB?.flag || ''}`;
+    document.getElementById('hl-match-time').textContent = `${formatDate(nextMatch.date)} ${nextMatch.time}`;
+
+    $matchHighlight.hidden = false;
+    $contentArea.classList.add('has-highlight');
+  }
+
+  // ── Team Badge ─────────────────────────────
+  function updateTeamBadge() {
+    if (state.favouriteTeam) {
+      const team = getTeam(state.favouriteTeam);
+      $currentTeamFlag.textContent = team?.flag || '';
+    } else {
+      $currentTeamFlag.textContent = '\u{26BD}';
+    }
+  }
+
+  // ── Map ────────────────────────────────────
+  function initMap() {
+    if (state.map) return;
+
+    state.map = L.map('map', {
+      center: [51.5074, -0.1278],
+      zoom: 12,
+      zoomControl: true,
+      attributionControl: true,
+    });
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(state.map);
+
+    state.map.zoomControl.setPosition('topright');
+
+    state.map.on('click', () => {
+      $mapCard.hidden = true;
+    });
+
+    setTimeout(() => state.map.invalidateSize(), 100);
+  }
+
+  function renderMapMarkers() {
+    if (!state.map) return;
+
+    state.markers.forEach(m => state.map.removeLayer(m));
+    state.markers = [];
+
+    const events = getFilteredEvents();
+
+    events.forEach(event => {
+      const isRecommended = state.favouriteTeam && eventMatchesTeam(event, state.favouriteTeam);
+      const markerClass = event.type === 'free' ? 'free-marker' : '';
+      const recClass = isRecommended ? ' recommended-marker' : '';
+
+      const icon = L.divIcon({
+        className: 'custom-marker',
+        html: `<div class="marker-dot ${markerClass}${recClass}"></div>`,
+        iconSize: [20, 25],
+        iconAnchor: [10, 25],
+      });
+
+      const marker = L.marker([event.lat, event.lng], { icon }).addTo(state.map);
+
+      marker.on('click', () => {
+        showMapCard(event);
+      });
+
+      state.markers.push(marker);
+    });
+
+    if (events.length > 0) {
+      const bounds = L.latLngBounds(events.map(e => [e.lat, e.lng]));
+      state.map.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+    }
+  }
+
+  function showMapCard(event) {
+    const btnLabel = event.type === 'ticketed' ? 'GET TICKETS' : 'RSVP / INFO';
+
+    $mapCard.innerHTML = `
+      <button class="map-card-close" aria-label="Close">&times;</button>
+      <span class="card-match">${matchLabelShort(event.matchId)}</span>
+      <span class="card-type-tag ${event.type}" style="float:right;margin-top:-4px">${event.type === 'free' ? 'FREE' : event.price}</span>
+      <div class="card-venue">${event.venue}</div>
+      <div class="card-address">${event.address}</div>
+      <div class="card-meta">
+        <span class="meta-pill vibe">${event.vibe}</span>
+        <span class="meta-pill">${event.capacity}</span>
+      </div>
+      <div class="card-time">${formatDate(event.date)} &middot; ${event.time}</div>
+      <div class="card-actions">
+        <a href="${event.link}" target="_blank" rel="noopener" class="card-btn primary">${btnLabel}</a>
+        <button class="card-btn secondary share-trigger" data-event-id="${event.id}">SHARE</button>
+      </div>
+    `;
+    $mapCard.hidden = false;
+
+    $mapCard.querySelector('.map-card-close').addEventListener('click', () => {
+      $mapCard.hidden = true;
+    });
+
+    $mapCard.querySelector('.share-trigger').addEventListener('click', (e) => {
+      e.stopPropagation();
+      openShareModal(event.id);
+    });
+  }
+
+  // ── Share Modal ────────────────────────────
+  function openShareModal(eventId) {
+    state.shareEventId = eventId;
+    const event = EVENTS.find(e => e.id === eventId);
+    if (!event) return;
+
+    $shareModal.hidden = false;
+    document.getElementById('copy-confirm').hidden = true;
+
+    const text = `${event.venue} — ${matchLabelShort(event.matchId)}\n${formatDate(event.date)} ${event.time}\n${event.link}`;
+    const url = event.link;
+
+    $shareModal.querySelectorAll('.share-btn').forEach(btn => {
+      btn.onclick = () => {
+        const platform = btn.dataset.platform;
+        if (platform === 'whatsapp') {
+          window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+        } else if (platform === 'twitter') {
+          window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+        } else if (platform === 'telegram') {
+          window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank');
+        } else if (platform === 'copy') {
+          navigator.clipboard.writeText(text).then(() => {
+            document.getElementById('copy-confirm').hidden = false;
+          });
+        }
+      };
+    });
+  }
+
+  $shareModal.querySelector('.modal-backdrop').addEventListener('click', () => {
+    $shareModal.hidden = true;
+  });
+
+  $shareModal.querySelector('.modal-close').addEventListener('click', () => {
+    $shareModal.hidden = true;
+  });
+
+  // ── Render Router ──────────────────────────
+  function renderCurrentTab() {
+    if (state.currentTab === 'tables') {
+      renderTables();
+    } else {
+      renderEventList();
+    }
+
+    if (state.currentView === 'map') {
+      renderMapMarkers();
+    }
+  }
+
+  // ── Init ───────────────────────────────────
+  function init() {
+    updateTeamBadge();
+    updateMatchHighlight();
+    renderCurrentTab();
+  }
+
+  // ── Boot ───────────────────────────────────
+  const savedTeam = loadTeam();
+  if (savedTeam) {
+    state.favouriteTeam = savedTeam;
+    hideOverlay();
+    init();
+  } else {
+    renderTeamGrid();
+  }
+})();
