@@ -237,6 +237,9 @@
     else if (filter === 'outdoor') events = events.filter(e => e.vibe === 'Outdoor');
 
     if (state.currentTab === 'upcoming') {
+      if (state.teamFilter && state.favouriteTeam) {
+        events = events.filter(e => eventMatchesTeam(e, state.favouriteTeam));
+      }
       events.sort((a, b) => {
         const da = new Date(a.date + 'T' + a.time);
         const db = new Date(b.date + 'T' + b.time);
@@ -249,22 +252,6 @@
         const db = new Date(b.date + 'T' + b.time);
         return da - db;
       });
-    } else if (state.currentTab === 'your-team') {
-      if (state.favouriteTeam) {
-        if (state.teamFilter) {
-          events = events.filter(e => eventMatchesTeam(e, state.favouriteTeam));
-        }
-        events.sort((a, b) => {
-          const aMatch = eventMatchesTeam(a, state.favouriteTeam) ? 0 : 1;
-          const bMatch = eventMatchesTeam(b, state.favouriteTeam) ? 0 : 1;
-          if (aMatch !== bMatch) return aMatch - bMatch;
-          const da = new Date(a.date + 'T' + a.time);
-          const db = new Date(b.date + 'T' + b.time);
-          return da - db;
-        });
-      } else {
-        events = [];
-      }
     }
 
     return events;
@@ -292,13 +279,11 @@
             <span>Tap the heart on any event to save it here.</span>
           `;
         }
-      } else if (state.currentTab === 'your-team' && !state.favouriteTeam) {
+      } else if (state.currentTab === 'upcoming' && state.teamFilter && state.favouriteTeam) {
+        const team = getTeam(state.favouriteTeam);
         $noResults.innerHTML = `
-          <p>NO TEAM SELECTED</p>
-          <span>Pick your team to see recommended events</span>
-          <button class="empty-cta" onclick="document.getElementById('btn-team-change').click()">
-            PICK A TEAM
-          </button>
+          <p>NO ${team?.name?.toUpperCase() || 'TEAM'} EVENTS</p>
+          <span>No screenings found for ${team?.flag || ''} ${team?.name || 'your team'} with current filters</span>
         `;
       } else {
         $noResults.innerHTML = '<p>NO EVENTS FOUND</p><span>Try changing your filters</span>';
@@ -310,12 +295,12 @@
     let html = '';
     let lastDate = '';
 
-    if (state.currentTab === 'your-team') {
+    if (state.currentTab === 'upcoming' && state.favouriteTeam) {
       const team = getTeam(state.favouriteTeam);
-      html += `<div class="tab-header">${team?.flag || ''} ${team?.name?.toUpperCase() || 'YOUR TEAM'}
+      html += `<div class="tab-header">UPCOMING
         <label class="team-toggle">
           <input type="checkbox" id="team-only-toggle" ${state.teamFilter ? 'checked' : ''}>
-          <span class="toggle-label">Only my team</span>
+          <span class="toggle-label">${team?.flag || ''} ${team?.name || 'My team'}</span>
         </label>
       </div>`;
     } else if (state.currentTab === 'favourites') {
