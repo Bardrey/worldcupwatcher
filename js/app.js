@@ -261,8 +261,24 @@
   function renderEventList() {
     const events = getFilteredEvents();
 
+    // Always build the tab header first so the toggle is always visible
+    let html = '';
+    let lastDate = '';
+
+    if (state.currentTab === 'upcoming' && state.favouriteTeam) {
+      const team = getTeam(state.favouriteTeam);
+      html += `<div class="tab-header">UPCOMING
+        <label class="team-toggle">
+          <input type="checkbox" id="team-only-toggle" ${state.teamFilter ? 'checked' : ''}>
+          <span class="toggle-label">${team?.flag || ''} ${team?.name || 'My team'}</span>
+        </label>
+      </div>`;
+    } else if (state.currentTab === 'favourites') {
+      html += `<div class="tab-header">YOUR FAVOURITES<span class="tab-count">${events.length} saved</span></div>`;
+    }
+
     if (events.length === 0) {
-      $eventList.innerHTML = '';
+      $eventList.innerHTML = html;
       $noResults.hidden = false;
       if (state.currentTab === 'favourites') {
         if (!state.signedIn) {
@@ -288,24 +304,18 @@
       } else {
         $noResults.innerHTML = '<p>NO EVENTS FOUND</p><span>Try changing your filters</span>';
       }
+      // Bind toggle even in empty state
+      const teamToggle = document.getElementById('team-only-toggle');
+      if (teamToggle) {
+        teamToggle.addEventListener('change', () => {
+          state.teamFilter = teamToggle.checked;
+          renderCurrentTab();
+        });
+      }
       return;
     }
 
     $noResults.hidden = true;
-    let html = '';
-    let lastDate = '';
-
-    if (state.currentTab === 'upcoming' && state.favouriteTeam) {
-      const team = getTeam(state.favouriteTeam);
-      html += `<div class="tab-header">UPCOMING
-        <label class="team-toggle">
-          <input type="checkbox" id="team-only-toggle" ${state.teamFilter ? 'checked' : ''}>
-          <span class="toggle-label">${team?.flag || ''} ${team?.name || 'My team'}</span>
-        </label>
-      </div>`;
-    } else if (state.currentTab === 'favourites') {
-      html += `<div class="tab-header">YOUR FAVOURITES<span class="tab-count">${events.length} saved</span></div>`;
-    }
 
     events.forEach(event => {
       if (event.date !== lastDate) {
