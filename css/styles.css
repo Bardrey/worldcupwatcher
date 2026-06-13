@@ -526,6 +526,10 @@ input {
   top: calc(var(--top-bar-height) + var(--filter-height) + 44px);
 }
 
+.content-area.no-filters {
+  top: var(--top-bar-height);
+}
+
 /* ============================================
    List View
    ============================================ */
@@ -564,6 +568,25 @@ input {
   letter-spacing: 1px;
   color: var(--text-muted);
   font-weight: 700;
+}
+
+.clear-filter-btn {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  padding: 4px 10px;
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-weight: 700;
+}
+
+.clear-filter-btn:hover {
+  border-color: var(--canada-red);
+  color: var(--canada-red);
 }
 
 /* Date Separator */
@@ -1190,6 +1213,204 @@ input {
 .map-card .card-actions {
   margin-top: 10px;
   padding-top: 10px;
+}
+
+/* ============================================
+   Fixtures Tab
+   ============================================ */
+.fixtures-view {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 12px 12px calc(12px + var(--safe-bottom));
+}
+
+/* Segmented Toggle */
+.segment-toggle {
+  display: flex;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 3px;
+  margin-bottom: 16px;
+}
+
+.segment-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 9px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--text-muted);
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.segment-btn.active {
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* Match Row */
+.fixture-group-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+  padding: 16px 4px 6px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.fixture-date-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--canada-red);
+  padding: 14px 4px 6px;
+  border-bottom: 2px solid var(--border);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.fixture-row {
+  display: flex;
+  align-items: center;
+  padding: 12px 8px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.15s;
+  border-radius: 8px;
+  margin: 2px 0;
+}
+
+.fixture-row:hover {
+  background: var(--surface-hover);
+}
+
+.fixture-row:active {
+  background: rgba(255, 43, 43, 0.06);
+}
+
+.fixture-row.highlight {
+  background: rgba(255, 43, 43, 0.06);
+  border: 1px solid rgba(255, 43, 43, 0.15);
+}
+
+.fixture-row.played {
+  opacity: 0.7;
+}
+
+.fixture-row.played:hover {
+  opacity: 1;
+}
+
+.fixture-teams {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.fixture-team {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.fixture-team.home {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.fixture-team.away {
+  justify-content: flex-start;
+}
+
+.fixture-team-name {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fixture-team-flag {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.fixture-score {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  padding: 0 10px;
+  min-width: 50px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.fixture-vs {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 0 8px;
+  min-width: 50px;
+  text-align: center;
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+.fixture-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 8px 0;
+}
+
+.fixture-time {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  font-weight: 700;
+}
+
+.fixture-stage {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.fixture-screenings {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  color: var(--mexico-green);
+  font-weight: 700;
+  padding: 3px 8px;
+  background: rgba(0, 104, 71, 0.08);
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.fixture-ft {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--text-muted);
+  font-weight: 700;
 }
 
 /* ============================================

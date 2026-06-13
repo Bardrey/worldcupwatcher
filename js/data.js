@@ -73,7 +73,7 @@ const TEAMS_2026 = [
 // All times in BST (British Summer Time, UTC+1) for London viewers
 const MATCHES = [
   // ── June 11 ──
-  { id: 'm1', teamA: 'MX', teamB: 'ZA', date: '2026-06-11', time: '20:00', stage: 'Group A', venue: 'Mexico City Stadium' },
+  { id: 'm1', teamA: 'MX', teamB: 'ZA', date: '2026-06-11', time: '20:00', stage: 'Group A', venue: 'Mexico City Stadium', scoreA: 2, scoreB: 0 },
 
   // ── June 12 ──
   { id: 'm2', teamA: 'CA', teamB: 'BA', date: '2026-06-12', time: '20:00', stage: 'Group B', venue: 'Toronto Stadium' },

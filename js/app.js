@@ -18,6 +18,8 @@
     userName: null,
     savedEvents: [],
     teamFilter: false,
+    matchFilter: null,       // matchId to filter upcoming events
+    fixturesSubTab: 'matches', // 'matches' or 'standings'
   };
 
   // ── Helpers ────────────────────────────────
@@ -220,6 +222,10 @@
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       item.classList.add('active');
       state.currentTab = item.dataset.tab;
+      // Clear match filter when manually switching to a tab
+      if (item.dataset.tab !== 'upcoming') {
+        state.matchFilter = null;
+      }
       renderCurrentTab();
     });
   });
@@ -237,7 +243,9 @@
     else if (filter === 'outdoor') events = events.filter(e => e.vibe === 'Outdoor');
 
     if (state.currentTab === 'upcoming') {
-      if (state.teamFilter && state.favouriteTeam) {
+      if (state.matchFilter) {
+        events = events.filter(e => e.matchId === state.matchFilter);
+      } else if (state.teamFilter && state.favouriteTeam) {
         events = events.filter(e => eventMatchesTeam(e, state.favouriteTeam));
       }
       events.sort((a, b) => {
@@ -265,7 +273,15 @@
     let html = '';
     let lastDate = '';
 
-    if (state.currentTab === 'upcoming' && state.favouriteTeam) {
+    if (state.currentTab === 'upcoming' && state.matchFilter) {
+      const match = getMatch(state.matchFilter);
+      const teamA = getTeam(match?.teamA);
+      const teamB = getTeam(match?.teamB);
+      html += `<div class="tab-header">
+        <span>${teamA?.flag || ''} ${teamA?.name || ''} vs ${teamB?.name || ''} ${teamB?.flag || ''}</span>
+        <button class="clear-filter-btn" id="clear-match-filter">✕ Clear</button>
+      </div>`;
+    } else if (state.currentTab === 'upcoming' && state.favouriteTeam) {
       const team = getTeam(state.favouriteTeam);
       html += `<div class="tab-header">UPCOMING
         <label class="team-toggle">
@@ -295,6 +311,12 @@
             <span>Tap the heart on any event to save it here.</span>
           `;
         }
+      } else if (state.currentTab === 'upcoming' && state.matchFilter) {
+        const match = getMatch(state.matchFilter);
+        $noResults.innerHTML = `
+          <p>NO SCREENINGS</p>
+          <span>No venues are screening this match yet</span>
+        `;
       } else if (state.currentTab === 'upcoming' && state.teamFilter && state.favouriteTeam) {
         const team = getTeam(state.favouriteTeam);
         $noResults.innerHTML = `
@@ -305,13 +327,7 @@
         $noResults.innerHTML = '<p>NO EVENTS FOUND</p><span>Try changing your filters</span>';
       }
       // Bind toggle even in empty state
-      const teamToggle = document.getElementById('team-only-toggle');
-      if (teamToggle) {
-        teamToggle.addEventListener('change', () => {
-          state.teamFilter = teamToggle.checked;
-          renderCurrentTab();
-        });
-      }
+      bindUpcomingControls();
       return;
     }
 
@@ -391,6 +407,10 @@
       });
     });
 
+    bindUpcomingControls();
+  }
+
+  function bindUpcomingControls() {
     const teamToggle = document.getElementById('team-only-toggle');
     if (teamToggle) {
       teamToggle.addEventListener('change', () => {
@@ -398,6 +418,154 @@
         renderCurrentTab();
       });
     }
+    const clearBtn = document.getElementById('clear-match-filter');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        state.matchFilter = null;
+        renderCurrentTab();
+      });
+    }
+  }
+
+  // ── Fixtures Tab ──────────────────────────
+  function getScreeningCount(matchId) {
+    return EVENTS.filter(e => e.matchId === matchId).length;
+  }
+
+  function renderFixtures() {
+    const subTab = state.fixturesSubTab;
+
+    let html = '<div class="fixtures-view">';
+
+    // Segmented toggle
+    html += `<div class="segment-toggle">
+      <button class="segment-btn${subTab === 'matches' ? ' active' : ''}" data-segment="matches">Matches</button>
+      <button class="segment-btn${subTab === 'standings' ? ' active' : ''}" data-segment="standings">Standings</button>
+    </div>`;
+
+    if (subTab === 'standings') {
+      html += renderStandingsHTML();
+      html += '</div>';
+      $eventList.innerHTML = html;
+      $noResults.hidden = true;
+      bindSegmentToggle();
+      return;
+    }
+
+    // Matches view — group by date
+    const sortedMatches = [...MATCHES].sort((a, b) => {
+      const da = new Date(a.date + 'T' + a.time);
+      const db = new Date(b.date + 'T' + b.time);
+      return da - db;
+    });
+
+    let lastDate = '';
+
+    sortedMatches.forEach(match => {
+      const teamA = getTeam(match.teamA);
+      const teamB = getTeam(match.teamB);
+      const isPlayed = match.scoreA !== undefined;
+      const isHighlight = state.favouriteTeam && (match.teamA === state.favouriteTeam || match.teamB === state.favouriteTeam);
+      const screenings = getScreeningCount(match.id);
+
+      if (match.date !== lastDate) {
+        lastDate = match.date;
+        html += `<div class="fixture-date-label">${formatDate(match.date)}</div>`;
+      }
+
+      html += `<div class="fixture-row${isPlayed ? ' played' : ''}${isHighlight ? ' highlight' : ''}" data-match-id="${match.id}">
+        <div class="fixture-teams">
+          <div class="fixture-team home">
+            <span class="fixture-team-name">${teamA?.name || match.teamA}</span>
+            <span class="fixture-team-flag">${teamA?.flag || ''}</span>
+          </div>
+          ${isPlayed
+            ? `<span class="fixture-score">${match.scoreA} - ${match.scoreB}</span>`
+            : `<span class="fixture-vs">${match.time}</span>`
+          }
+          <div class="fixture-team away">
+            <span class="fixture-team-flag">${teamB?.flag || ''}</span>
+            <span class="fixture-team-name">${teamB?.name || match.teamB}</span>
+          </div>
+        </div>
+      </div>
+      <div class="fixture-meta">
+        <span class="fixture-stage">${match.stage}</span>
+        ${isPlayed
+          ? '<span class="fixture-ft">FT</span>'
+          : (screenings > 0
+            ? `<span class="fixture-screenings">${screenings} screening${screenings !== 1 ? 's' : ''}</span>`
+            : '')
+        }
+      </div>`;
+    });
+
+    html += '</div>';
+    $eventList.innerHTML = html;
+    $noResults.hidden = true;
+
+    // Bind fixture row clicks
+    document.querySelectorAll('.fixture-row').forEach(row => {
+      row.addEventListener('click', () => {
+        const matchId = row.dataset.matchId;
+        const screenings = getScreeningCount(matchId);
+        if (screenings > 0) {
+          state.matchFilter = matchId;
+          state.currentTab = 'upcoming';
+          document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+          document.querySelector('.nav-item[data-tab="upcoming"]').classList.add('active');
+          renderCurrentTab();
+        }
+      });
+    });
+
+    bindSegmentToggle();
+  }
+
+  function bindSegmentToggle() {
+    document.querySelectorAll('.segment-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.fixturesSubTab = btn.dataset.segment;
+        renderCurrentTab();
+      });
+    });
+  }
+
+  function renderStandingsHTML() {
+    let html = '';
+    for (const [group, standings] of Object.entries(GROUP_STANDINGS)) {
+      html += `<div class="group-header">GROUP ${group}</div>`;
+      html += `
+        <div class="table-row header">
+          <span class="pos">#</span>
+          <span class="team-col">TEAM</span>
+          <span class="stat">P</span>
+          <span class="stat">W</span>
+          <span class="stat">D</span>
+          <span class="stat">GD</span>
+          <span class="pts">PTS</span>
+        </div>
+      `;
+      standings.forEach((row, i) => {
+        const team = getTeam(row.team);
+        const isHighlight = state.favouriteTeam && row.team === state.favouriteTeam;
+        html += `
+          <div class="table-row${isHighlight ? ' highlight-row' : ''}">
+            <span class="pos">${i + 1}</span>
+            <span class="team-col">
+              <span class="flag">${team?.flag || ''}</span>
+              <span class="name">${team?.name || row.team}</span>
+            </span>
+            <span class="stat">${row.p}</span>
+            <span class="stat">${row.w}</span>
+            <span class="stat">${row.d}</span>
+            <span class="stat">${row.gd > 0 ? '+' : ''}${row.gd}</span>
+            <span class="pts">${row.pts}</span>
+          </div>
+        `;
+      });
+    }
+    return html;
   }
 
   // ── League Tables ──────────────────────────
@@ -615,7 +783,21 @@
 
   // ── Render Router ──────────────────────────
   function renderCurrentTab() {
-    renderEventList();
+    const $filterBar = document.querySelector('.filter-bar');
+    if (state.currentTab === 'fixtures') {
+      $filterBar.hidden = true;
+      $matchHighlight.hidden = true;
+      $btnOpenMap.hidden = true;
+      $contentArea.classList.remove('has-highlight');
+      $contentArea.classList.add('no-filters');
+      renderFixtures();
+    } else {
+      $filterBar.hidden = false;
+      $btnOpenMap.hidden = false;
+      $contentArea.classList.remove('no-filters');
+      updateMatchHighlight();
+      renderEventList();
+    }
   }
 
   // ── Init ───────────────────────────────────
