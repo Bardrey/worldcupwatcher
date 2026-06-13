@@ -99,6 +99,7 @@ input {
   max-width: 480px;
   padding: 40px 20px 60px;
   text-align: center;
+  overflow-x: hidden;
 }
 
 .overlay-logo {
@@ -813,6 +814,150 @@ input {
 .no-results span {
   font-size: 13px;
   color: var(--text-muted);
+}
+
+.empty-cta {
+  display: block;
+  margin: 20px auto 0;
+  padding: 12px 24px;
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ── Favourite Heart Button ──────────────── */
+.card-top-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fav-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: var(--text-muted);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.fav-btn:hover {
+  color: var(--canada-red);
+  transform: scale(1.2);
+}
+
+.fav-btn.fav-active {
+  color: var(--canada-red);
+}
+
+/* ── Team Toggle ─────────────────────────── */
+.team-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  float: right;
+  cursor: pointer;
+}
+
+.team-toggle input[type="checkbox"] {
+  width: 36px;
+  height: 20px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--border);
+  border-radius: 10px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.team-toggle input[type="checkbox"]::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.2s;
+}
+
+.team-toggle input[type="checkbox"]:checked {
+  background: var(--canada-red);
+}
+
+.team-toggle input[type="checkbox"]:checked::after {
+  transform: translateX(16px);
+}
+
+.toggle-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+/* ── Sign-In Modal ───────────────────────── */
+.signin-content {
+  text-align: center;
+}
+
+.signin-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 8px 0 24px;
+  line-height: 1.5;
+}
+
+.signin-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.signin-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.signin-btn:hover {
+  border-color: var(--text);
+  transform: translateY(-1px);
+}
+
+.signin-btn.apple {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+.signin-btn.apple:hover {
+  background: #222;
+  border-color: #222;
 }
 
 /* ============================================

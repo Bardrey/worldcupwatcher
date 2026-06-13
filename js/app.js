@@ -14,6 +14,10 @@
     map: null,
     markers: [],
     shareEventId: null,
+    signedIn: false,
+    userName: null,
+    savedEvents: [],
+    teamFilter: false,
   };
 
   // ── Helpers ────────────────────────────────
@@ -77,6 +81,42 @@
     localStorage.setItem('wcw_team', code);
   }
 
+  function loadAuth() {
+    const auth = localStorage.getItem('wcw_auth');
+    if (auth) {
+      const parsed = JSON.parse(auth);
+      state.signedIn = true;
+      state.userName = parsed.name;
+    }
+  }
+
+  function saveAuth(name, provider) {
+    state.signedIn = true;
+    state.userName = name;
+    localStorage.setItem('wcw_auth', JSON.stringify({ name, provider }));
+  }
+
+  function loadSavedEvents() {
+    const saved = localStorage.getItem('wcw_saved');
+    state.savedEvents = saved ? JSON.parse(saved) : [];
+  }
+
+  function saveFavourite(eventId) {
+    if (!state.savedEvents.includes(eventId)) {
+      state.savedEvents.push(eventId);
+      localStorage.setItem('wcw_saved', JSON.stringify(state.savedEvents));
+    }
+  }
+
+  function removeFavourite(eventId) {
+    state.savedEvents = state.savedEvents.filter(id => id !== eventId);
+    localStorage.setItem('wcw_saved', JSON.stringify(state.savedEvents));
+  }
+
+  function isFavourited(eventId) {
+    return state.savedEvents.includes(eventId);
+  }
+
   // ── DOM Refs ───────────────────────────────
   const $overlay = document.getElementById('team-select-overlay');
   const $teamGrid = document.getElementById('team-grid');
@@ -94,6 +134,7 @@
   const $btnTeamChange = document.getElementById('btn-team-change');
   const $shareModal = document.getElementById('share-modal');
   const $mapCard = document.getElementById('map-card');
+  const $signinModal = document.getElementById('signin-modal');
 
   // ── Team Selection ─────────────────────────
   function renderTeamGrid(filter = '') {
@@ -197,17 +238,26 @@
         const db = new Date(b.date + 'T' + b.time);
         return da - db;
       });
-    } else if (state.currentTab === 'popular') {
-      const bigMatches = ['m4', 'm6', 'm11', 'm14', 'm26', 'm29', 'm35', 'm37', 'm39'];
-      events = events.filter(e => bigMatches.includes(e.matchId));
-      events.sort((a, b) => {
-        const capA = parseInt(a.capacity) || 0;
-        const capB = parseInt(b.capacity) || 0;
-        return capB - capA;
-      });
     } else if (state.currentTab === 'favourites') {
+      events = events.filter(e => state.savedEvents.includes(e.id));
+      events.sort((a, b) => {
+        const da = new Date(a.date + 'T' + a.time);
+        const db = new Date(b.date + 'T' + b.time);
+        return da - db;
+      });
+    } else if (state.currentTab === 'your-team') {
       if (state.favouriteTeam) {
-        events = events.filter(e => eventMatchesTeam(e, state.favouriteTeam));
+        if (state.teamFilter) {
+          events = events.filter(e => eventMatchesTeam(e, state.favouriteTeam));
+        }
+        events.sort((a, b) => {
+          const aMatch = eventMatchesTeam(a, state.favouriteTeam) ? 0 : 1;
+          const bMatch = eventMatchesTeam(b, state.favouriteTeam) ? 0 : 1;
+          if (aMatch !== bMatch) return aMatch - bMatch;
+          const da = new Date(a.date + 'T' + a.time);
+          const db = new Date(b.date + 'T' + b.time);
+          return da - db;
+        });
       } else {
         events = [];
       }
@@ -223,12 +273,26 @@
     if (events.length === 0) {
       $eventList.innerHTML = '';
       $noResults.hidden = false;
-      if (state.currentTab === 'favourites' && !state.favouriteTeam) {
+      if (state.currentTab === 'favourites') {
+        if (!state.signedIn) {
+          $noResults.innerHTML = `
+            <p>SAVE YOUR FAVOURITES</p>
+            <span>Sign in to save venues you love and never miss a screening.</span>
+            <button class="empty-cta" onclick="document.getElementById('signin-modal').hidden=false">
+              SIGN IN
+            </button>
+          `;
+        } else {
+          $noResults.innerHTML = `
+            <p>NO FAVOURITES YET</p>
+            <span>Tap the heart on any event to save it here.</span>
+          `;
+        }
+      } else if (state.currentTab === 'your-team' && !state.favouriteTeam) {
         $noResults.innerHTML = `
           <p>NO TEAM SELECTED</p>
           <span>Pick your team to see recommended events</span>
-          <button onclick="document.getElementById('btn-team-change').click()"
-                  style="display:block;margin:16px auto 0;padding:10px 20px;background:var(--accent);color:var(--bg);border:none;border-radius:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:1px;cursor:pointer">
+          <button class="empty-cta" onclick="document.getElementById('btn-team-change').click()">
             PICK A TEAM
           </button>
         `;
@@ -242,11 +306,16 @@
     let html = '';
     let lastDate = '';
 
-    if (state.currentTab === 'popular') {
-      html += `<div class="tab-header">BIG FIXTURES<span class="tab-count">${events.length} events</span></div>`;
-    } else if (state.currentTab === 'favourites') {
+    if (state.currentTab === 'your-team') {
       const team = getTeam(state.favouriteTeam);
-      html += `<div class="tab-header">${team?.flag || ''} ${team?.name?.toUpperCase() || 'YOUR TEAM'} MATCHES<span class="tab-count">${events.length} events</span></div>`;
+      html += `<div class="tab-header">${team?.flag || ''} ${team?.name?.toUpperCase() || 'YOUR TEAM'}
+        <label class="team-toggle">
+          <input type="checkbox" id="team-only-toggle" ${state.teamFilter ? 'checked' : ''}>
+          <span class="toggle-label">Only my team</span>
+        </label>
+      </div>`;
+    } else if (state.currentTab === 'favourites') {
+      html += `<div class="tab-header">YOUR FAVOURITES<span class="tab-count">${events.length} saved</span></div>`;
     }
 
     events.forEach(event => {
@@ -256,8 +325,9 @@
       }
 
       const match = getMatch(event.matchId);
-      const isRecommended = state.favouriteTeam && eventMatchesTeam(event, state.favouriteTeam) && state.currentTab !== 'favourites';
+      const isRecommended = state.favouriteTeam && eventMatchesTeam(event, state.favouriteTeam) && state.currentTab !== 'your-team';
       const btnLabel = event.type === 'ticketed' ? 'GET TICKETS' : 'RSVP / INFO';
+      const isFav = isFavourited(event.id);
 
       const venueImg = VENUE_IMAGES[event.venue] || null;
 
@@ -267,7 +337,12 @@
           <div class="card-body">
             <div class="card-top">
               <span class="card-match">${matchLabelShort(event.matchId)}</span>
-              <span class="card-type-tag ${event.type}">${event.type === 'free' ? 'FREE' : event.price}</span>
+              <div class="card-top-right">
+                <span class="card-type-tag ${event.type}">${event.type === 'free' ? 'FREE' : event.price}</span>
+                <button class="fav-btn${isFav ? ' fav-active' : ''}" data-fav-id="${event.id}" aria-label="Favourite">
+                  <svg width="16" height="16" viewBox="0 0 20 20" fill="${isFav ? 'var(--canada-red)' : 'none'}"><path d="M10 17s-7-4.35-7-8.5C3 5.46 5.46 3 8 3c1.4 0 2.6.7 3.4 1.7L10 6l-1.4-1.3C9.4 3.7 10.6 3 12 3c2.54 0 5 2.46 5 5.5 0 4.15-7 8.5-7 8.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
             </div>
             <div class="card-venue">${event.venue}</div>
             <div class="card-address">${event.address}</div>
@@ -299,6 +374,31 @@
         openShareModal(btn.dataset.eventId);
       });
     });
+
+    document.querySelectorAll('.fav-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!state.signedIn) {
+          $signinModal.hidden = false;
+          return;
+        }
+        const eventId = btn.dataset.favId;
+        if (isFavourited(eventId)) {
+          removeFavourite(eventId);
+        } else {
+          saveFavourite(eventId);
+        }
+        renderCurrentTab();
+      });
+    });
+
+    const teamToggle = document.getElementById('team-only-toggle');
+    if (teamToggle) {
+      teamToggle.addEventListener('change', () => {
+        state.teamFilter = teamToggle.checked;
+        renderCurrentTab();
+      });
+    }
   }
 
   // ── League Tables ──────────────────────────
@@ -516,11 +616,7 @@
 
   // ── Render Router ──────────────────────────
   function renderCurrentTab() {
-    if (state.currentTab === 'tables') {
-      renderTables();
-    } else {
-      renderEventList();
-    }
+    renderEventList();
 
     if (state.currentView === 'map') {
       renderMapMarkers();
@@ -534,7 +630,30 @@
     renderCurrentTab();
   }
 
+  // ── Sign-In Modal ──────────────────────────
+  $signinModal.querySelector('.modal-backdrop').addEventListener('click', () => {
+    $signinModal.hidden = true;
+  });
+  $signinModal.querySelector('.modal-close').addEventListener('click', () => {
+    $signinModal.hidden = true;
+  });
+
+  document.getElementById('signin-apple').addEventListener('click', () => {
+    saveAuth('Apple User', 'apple');
+    $signinModal.hidden = true;
+    renderCurrentTab();
+  });
+
+  document.getElementById('signin-google').addEventListener('click', () => {
+    saveAuth('Google User', 'google');
+    $signinModal.hidden = true;
+    renderCurrentTab();
+  });
+
   // ── Boot ───────────────────────────────────
+  loadAuth();
+  loadSavedEvents();
+
   const savedTeam = loadTeam();
   if (savedTeam) {
     state.favouriteTeam = savedTeam;
