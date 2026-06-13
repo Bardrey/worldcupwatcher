@@ -473,7 +473,7 @@
         html += `<div class="fixture-date-label">${formatDate(match.date)}</div>`;
       }
 
-      html += `<div class="fixture-row${isPlayed ? ' played' : ''}${isHighlight ? ' highlight' : ''}" data-match-id="${match.id}">
+      html += `<div class="fixture-row${isPlayed ? ' played' : ''}${isHighlight ? ' highlight' : ''}${screenings > 0 && !isPlayed ? ' has-screenings' : ''}" data-match-id="${match.id}">
         <div class="fixture-teams">
           <div class="fixture-team home">
             <span class="fixture-team-name">${teamA?.name || match.teamA}</span>
@@ -488,15 +488,13 @@
             <span class="fixture-team-name">${teamB?.name || match.teamB}</span>
           </div>
         </div>
-      </div>
-      <div class="fixture-meta">
-        <span class="fixture-stage">${match.stage}</span>
-        ${isPlayed
-          ? '<span class="fixture-ft">FT</span>'
-          : (screenings > 0
-            ? `<span class="fixture-screenings">${screenings} screening${screenings !== 1 ? 's' : ''}</span>`
-            : '')
-        }
+        <div class="fixture-bottom">
+          <span class="fixture-stage">${match.stage}${isPlayed ? ' · FT' : ''}</span>
+          ${!isPlayed && screenings > 0
+            ? `<span class="fixture-screenings">${screenings} screening${screenings !== 1 ? 's' : ''} ›</span>`
+            : ''
+          }
+        </div>
       </div>`;
     });
 
@@ -515,6 +513,8 @@
           document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
           document.querySelector('.nav-item[data-tab="upcoming"]').classList.add('active');
           renderCurrentTab();
+          // Scroll to top so the fixture header is aligned right under the match highlight
+          document.querySelector('.list-view').scrollTop = 0;
         }
       });
     });
@@ -791,6 +791,8 @@
       $contentArea.classList.remove('has-highlight');
       $contentArea.classList.add('no-filters');
       renderFixtures();
+      // Always scroll to top when entering fixtures
+      document.querySelector('.list-view').scrollTop = 0;
     } else {
       $filterBar.hidden = false;
       $btnOpenMap.hidden = false;
