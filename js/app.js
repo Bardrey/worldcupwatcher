@@ -123,11 +123,8 @@
   const $teamSearch = document.getElementById('team-search');
   const $skipTeam = document.getElementById('skip-team');
   const $listView = document.getElementById('list-view');
-  const $mapView = document.getElementById('map-view');
   const $eventList = document.getElementById('event-list');
   const $noResults = document.getElementById('no-results');
-  const $btnListView = document.getElementById('btn-list-view');
-  const $btnMapView = document.getElementById('btn-map-view');
   const $contentArea = document.getElementById('content-area');
   const $matchHighlight = document.getElementById('match-highlight');
   const $currentTeamFlag = document.getElementById('current-team-flag');
@@ -135,6 +132,9 @@
   const $shareModal = document.getElementById('share-modal');
   const $mapCard = document.getElementById('map-card');
   const $signinModal = document.getElementById('signin-modal');
+  const $mapMode = document.getElementById('map-mode');
+  const $btnOpenMap = document.getElementById('btn-open-map');
+  const $btnCloseMap = document.getElementById('btn-close-map');
 
   // ── Team Selection ─────────────────────────
   function renderTeamGrid(filter = '') {
@@ -183,21 +183,25 @@
     showOverlay();
   });
 
-  // ── View Toggle ────────────────────────────
-  $btnListView.addEventListener('click', () => switchView('list'));
-  $btnMapView.addEventListener('click', () => switchView('map'));
+  // ── Map Mode ────────────────────────────────
+  $btnOpenMap.addEventListener('click', () => openMapMode());
+  $btnCloseMap.addEventListener('click', () => closeMapMode());
 
-  function switchView(view) {
-    state.currentView = view;
-    $btnListView.classList.toggle('active', view === 'list');
-    $btnMapView.classList.toggle('active', view === 'map');
-    $listView.hidden = view !== 'list';
-    $mapView.hidden = view !== 'map';
+  function openMapMode() {
+    state.currentView = 'map';
+    $mapMode.hidden = false;
+    $btnOpenMap.hidden = true;
+    document.body.style.overflow = 'hidden';
+    initMap();
+    renderMapMarkers();
+  }
 
-    if (view === 'map') {
-      initMap();
-      renderMapMarkers();
-    }
+  function closeMapMode() {
+    state.currentView = 'list';
+    $mapMode.hidden = true;
+    $btnOpenMap.hidden = false;
+    $mapCard.hidden = true;
+    document.body.style.overflow = '';
   }
 
   // ── Filter Chips ───────────────────────────
@@ -617,10 +621,6 @@
   // ── Render Router ──────────────────────────
   function renderCurrentTab() {
     renderEventList();
-
-    if (state.currentView === 'map') {
-      renderMapMarkers();
-    }
   }
 
   // ── Init ───────────────────────────────────

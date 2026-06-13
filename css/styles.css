@@ -383,32 +383,6 @@ input {
   letter-spacing: -1px;
 }
 
-.view-toggle {
-  display: flex;
-  gap: 2px;
-  background: var(--bg);
-  border-radius: 10px;
-  padding: 3px;
-  border: 2px solid var(--border);
-}
-
-.view-btn {
-  width: 38px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  color: var(--text-muted);
-  transition: all 0.15s;
-}
-
-.view-btn.active {
-  background: var(--canada-red);
-  color: white;
-  box-shadow: 0 2px 6px rgba(255, 43, 43, 0.3);
-}
-
 .team-badge {
   width: 40px;
   height: 40px;
@@ -963,15 +937,85 @@ input {
 /* ============================================
    Map View
    ============================================ */
-.map-view {
-  height: 100%;
-  position: relative;
+/* ── Floating Map Button (Airbnb-style) ──── */
+.floating-map-btn {
+  position: fixed;
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 99;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 20px;
+  background: var(--text);
+  color: white;
+  border: none;
+  border-radius: 24px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s;
 }
 
-.map {
-  height: 100%;
-  width: 100%;
+.floating-map-btn:hover {
+  transform: translateX(-50%) scale(1.05);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.floating-map-btn:active {
+  transform: translateX(-50%) scale(0.97);
+}
+
+/* ── Full-Screen Map Mode ────────────────── */
+.map-mode {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
   background: var(--bg);
+}
+
+.map-mode[hidden] {
+  display: none;
+}
+
+.map-fullscreen {
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+}
+
+.map-back-btn {
+  position: absolute;
+  top: max(16px, env(safe-area-inset-top, 16px));
+  left: 16px;
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 16px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 24px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12);
+  transition: all 0.15s;
+}
+
+.map-back-btn:hover {
+  background: var(--bg);
+}
+
+.map-mode .map-legend-float {
+  top: max(64px, calc(env(safe-area-inset-top, 16px) + 52px));
+  left: 16px;
+  right: auto;
 }
 
 .leaflet-container {
@@ -1239,8 +1283,23 @@ input {
   background: var(--surface);
   border-top: 2px solid var(--border);
   display: flex;
-  z-index: 100;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 0 16px;
   padding-bottom: var(--safe-bottom);
+  z-index: 100;
+}
+
+.bottom-nav::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -100vw;
+  right: -100vw;
+  bottom: 0;
+  background: var(--surface);
+  border-top: 2px solid var(--border);
+  z-index: -1;
 }
 
 .nav-item {
