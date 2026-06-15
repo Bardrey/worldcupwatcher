@@ -22,6 +22,7 @@
     mapTodayOnly: false,
     userLocation: null,
     userMarker: null,
+    selectedCity: localStorage.getItem('wcw_city') || 'london',
   };
 
   // ── Helpers ────────────────────────────────
@@ -145,6 +146,23 @@
   const $mapMode = document.getElementById('map-mode');
   const $btnOpenMap = document.getElementById('btn-open-map');
   const $btnCloseMap = document.getElementById('btn-close-map');
+  const $citySelect = document.getElementById('city-select');
+  const $cityBar = document.querySelector('.city-bar');
+
+  // ── City Selector ─────────────────────────
+  $citySelect.value = state.selectedCity;
+
+  $citySelect.addEventListener('change', () => {
+    state.selectedCity = $citySelect.value;
+    localStorage.setItem('wcw_city', state.selectedCity);
+    updateMatchHighlight();
+    renderCurrentTab();
+    if (state.map) {
+      const city = UK_CITIES[state.selectedCity];
+      state.map.setView([city.lat, city.lng], city.zoom);
+      renderMapMarkers();
+    }
+  });
 
   // ── Team Selection ─────────────────────────
   function renderTeamGrid(filter = '') {
@@ -228,10 +246,32 @@
       (pos) => {
         state.userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         showUserOnMap(state.userLocation);
+        autoSelectNearestCity(state.userLocation);
       },
       () => {},
       { enableHighAccuracy: false, timeout: 8000 }
     );
+  }
+
+  function autoSelectNearestCity(loc) {
+    if (localStorage.getItem('wcw_city')) return;
+    let best = 'london', bestDist = Infinity;
+    for (const [key, city] of Object.entries(UK_CITIES)) {
+      const d = Math.pow(loc.lat - city.lat, 2) + Math.pow(loc.lng - city.lng, 2);
+      if (d < bestDist) { bestDist = d; best = key; }
+    }
+    if (best !== state.selectedCity) {
+      state.selectedCity = best;
+      $citySelect.value = best;
+      localStorage.setItem('wcw_city', best);
+      const city = UK_CITIES[best];
+      if (state.map) {
+        state.map.setView([city.lat, city.lng], city.zoom);
+        renderMapMarkers();
+      }
+      updateMatchHighlight();
+      renderCurrentTab();
+    }
   }
 
   function showUserOnMap(loc) {
@@ -283,7 +323,7 @@
 
   // ── Filtering & Sorting ────────────────────
   function getFilteredEvents() {
-    let events = [...EVENTS];
+    let events = EVENTS.filter(e => e.city === state.selectedCity);
     const filter = state.currentFilter;
 
     if (filter === 'free') events = events.filter(e => e.type === 'free');
@@ -662,6 +702,7 @@
       $matchHighlight.hidden = true;
       $contentArea.classList.remove('has-highlight');
       $filterBar.classList.remove('has-highlight');
+      $cityBar.classList.remove('has-highlight');
       return;
     }
 
@@ -676,6 +717,7 @@
       $matchHighlight.hidden = true;
       $contentArea.classList.remove('has-highlight');
       $filterBar.classList.remove('has-highlight');
+      $cityBar.classList.remove('has-highlight');
       return;
     }
 
@@ -689,6 +731,7 @@
     $matchHighlight.hidden = false;
     $contentArea.classList.add('has-highlight');
     $filterBar.classList.add('has-highlight');
+    $cityBar.classList.add('has-highlight');
   }
 
   // ── Team Badge ─────────────────────────────
@@ -705,9 +748,10 @@
   function initMap() {
     if (state.map) return;
 
+    const city = UK_CITIES[state.selectedCity] || UK_CITIES.london;
     state.map = L.map('map', {
-      center: [51.5074, -0.1278],
-      zoom: 12,
+      center: [city.lat, city.lng],
+      zoom: city.zoom,
       zoomControl: true,
       attributionControl: true,
     });
@@ -841,9 +885,9 @@
       $matchHighlight.hidden = true;
       $btnOpenMap.hidden = true;
       $contentArea.classList.remove('has-highlight');
+      $cityBar.classList.remove('has-highlight');
       $contentArea.classList.add('no-filters');
       renderFixtures();
-      // Scroll to today's date (or nearest upcoming)
       const scrollTarget = document.getElementById('fixture-scroll-target');
       if (scrollTarget) {
         scrollTarget.scrollIntoView({ block: 'start' });
@@ -862,6 +906,16 @@
     updateTeamBadge();
     updateMatchHighlight();
     renderCurrentTab();
+    if (!localStorage.getItem('wcw_city') && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          state.userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          autoSelectNearestCity(state.userLocation);
+        },
+        () => {},
+        { enableHighAccuracy: false, timeout: 8000 }
+      );
+    }
   }
 
   // ── Cookie Banner ──────────────────────────

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>WORLDCUPWATCHER</title>
-  <meta name="description" content="Find the best places to watch the 2026 World Cup in London. Free screenings, fan zones, pubs and more.">
+  <meta name="description" content="Find the best places to watch the 2026 World Cup across the UK. Free screenings, fan zones, pubs and more.">
   <meta name="theme-color" content="#0a0a0a">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>%E2%9A%BD</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,7 +21,7 @@
       <div class="overlay-logo">
         <span class="logo-world">WORLD</span><span class="logo-cup">CUP</span><span class="logo-watcher">WATCHER</span>
       </div>
-      <p class="overlay-subtitle">FIND YOUR SCREEN.<br>PICK YOUR TEAM.<br>LONDON 2026.</p>
+      <p class="overlay-subtitle">FIND YOUR SCREEN.<br>PICK YOUR TEAM.<br>UK 2026.</p>
       <div class="team-search-wrap">
         <input type="text" id="team-search" placeholder="Search your country..." autocomplete="off">
       </div>
@@ -69,6 +69,21 @@
       </div>
       <span id="hl-match-time" class="match-time"></span>
     </div>
+  </div>
+
+  <!-- City Selector -->
+  <div class="city-bar">
+    <select id="city-select" class="city-select">
+      <option value="london">London</option>
+      <option value="manchester">Manchester</option>
+      <option value="birmingham">Birmingham</option>
+      <option value="glasgow">Glasgow</option>
+      <option value="edinburgh">Edinburgh</option>
+      <option value="liverpool">Liverpool</option>
+      <option value="leeds">Leeds</option>
+      <option value="bristol">Bristol</option>
+      <option value="newcastle">Newcastle</option>
+    </select>
   </div>
 
   <!-- Filter Bar -->

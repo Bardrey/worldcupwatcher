@@ -4,8 +4,22 @@
 
    Match schedule: ESPN, FIFA.com, Al Jazeera
    Events: TimeOut London, DesignMyNight,
-           Londonist, Eventbrite, Skiddle
+           Londonist, Eventbrite, Skiddle,
+           BOXPARK, TOCA Social, VisitGlasgow,
+           headfirstbristol, eurochange
    ============================================ */
+
+const UK_CITIES = {
+  london:     { name: 'London',     lat: 51.5074, lng: -0.1278, zoom: 12 },
+  manchester: { name: 'Manchester', lat: 53.4808, lng: -2.2426, zoom: 13 },
+  birmingham: { name: 'Birmingham', lat: 52.4862, lng: -1.8904, zoom: 13 },
+  glasgow:    { name: 'Glasgow',    lat: 55.8642, lng: -4.2518, zoom: 13 },
+  edinburgh:  { name: 'Edinburgh',  lat: 55.9533, lng: -3.1883, zoom: 13 },
+  liverpool:  { name: 'Liverpool',  lat: 53.4084, lng: -2.9916, zoom: 13 },
+  leeds:      { name: 'Leeds',      lat: 53.8008, lng: -1.5491, zoom: 13 },
+  bristol:    { name: 'Bristol',    lat: 51.4545, lng: -2.5879, zoom: 13 },
+  newcastle:  { name: 'Newcastle',  lat: 54.9783, lng: -1.6178, zoom: 13 },
+};
 
 const TEAMS_2026 = [
   // Group A
@@ -83,6 +97,7 @@ const MATCHES = [
   { id: 'm4', teamA: 'BR', teamB: 'MA', date: '2026-06-13', time: '23:00', stage: 'Group C', venue: 'MetLife Stadium, NJ' },
 
   // ── June 14 ──
+  { id: 'm4b', teamA: 'SCO', teamB: 'HT', date: '2026-06-14', time: '02:00', stage: 'Group C', venue: 'Gillette Stadium, Boston', scoreA: 1, scoreB: 0 },
   { id: 'm5', teamA: 'DE', teamB: 'CW', date: '2026-06-14', time: '18:00', stage: 'Group E', venue: 'Houston Stadium' },
   { id: 'm6', teamA: 'NL', teamB: 'JP', date: '2026-06-14', time: '21:00', stage: 'Group F', venue: 'AT&T Stadium, Dallas' },
   { id: 'm7', teamA: 'CI', teamB: 'EC', date: '2026-06-14', time: '00:00', stage: 'Group E', venue: 'Lincoln Financial Field' },
@@ -108,6 +123,7 @@ const MATCHES = [
 
   // ── June 19 ──
   { id: 'm19', teamA: 'US', teamB: 'AU', date: '2026-06-19', time: '20:00', stage: 'Group D', venue: 'Lumen Field, Seattle' },
+  { id: 'm19b', teamA: 'BR', teamB: 'HT', date: '2026-06-19', time: '23:00', stage: 'Group C', venue: 'Lincoln Financial Field' },
   { id: 'm20', teamA: 'SCO', teamB: 'MA', date: '2026-06-19', time: '23:00', stage: 'Group C', venue: 'Gillette Stadium, Boston' },
 
   // ── June 20 ──
@@ -167,7 +183,7 @@ const EVENTS = [
   // BRAZIL vs MOROCCO — Sat 13 Jun, 23:00 BST
   // ══════════════════════════════════════════
   {
-    id: 'e1',
+    id: 'e1', city: 'london',
     title: 'Brazil vs Morocco — Boxhall City',
     venue: 'Boxhall City',
     address: 'Boxhall City, London',
@@ -181,7 +197,7 @@ const EVENTS = [
     description: 'Ticketed screening with drinks and food from 14 independent kitchens. 9pm–1:30am.'
   },
   {
-    id: 'e2',
+    id: 'e2', city: 'london',
     title: 'Brazil vs Morocco — The Garden Vauxhall',
     venue: 'The Garden Vauxhall',
     address: 'Fire Club & The Garden, Vauxhall, SW8',
@@ -195,7 +211,7 @@ const EVENTS = [
     description: 'Massive open-air beer garden with three LED screens, rotating street food stalls and two large bars. £6 non-England matches.'
   },
   {
-    id: 'e3',
+    id: 'e3', city: 'london',
     title: 'Brazil vs Morocco — German Kraft Brewery',
     venue: 'German Kraft Brewery at Mercato Metropolitano',
     address: 'Mercato Metropolitano, 42 Newington Causeway, SE1 6DR',
@@ -209,7 +225,7 @@ const EVENTS = [
     description: 'Free entry, 700-capacity open-air screening area. 20sqm screen. 50+ food stalls. 10 free pints given away every time England or Germany score.'
   },
   {
-    id: 'e4',
+    id: 'e4', city: 'london',
     title: 'Brazil vs Morocco — Paddy\'s Sportsbook at The Hippodrome',
     venue: 'The Hippodrome Casino',
     address: 'Cranbourn St, Leicester Square, WC2H 7JH',
@@ -223,7 +239,7 @@ const EVENTS = [
     description: '54 HD screens plus a massive 10-metre screen. Open until 4am. Showing every single match of the tournament.'
   },
   {
-    id: 'e5',
+    id: 'e5', city: 'london',
     title: 'Brazil vs Morocco — Mare Street Market',
     venue: 'Mare Street Market',
     address: '117 Mare St, Hackney, E8 4RU',
@@ -237,7 +253,7 @@ const EVENTS = [
     description: '10,000 sq ft space with big screen and three outdoor terrace screens. No booking fee. Showing every match.'
   },
   {
-    id: 'e6',
+    id: 'e6', city: 'london',
     title: 'Brazil vs Morocco — The Dial, Meantime Brewery',
     venue: 'The Dial - Home of Meantime',
     address: 'Greenwich Peninsula, SE10',
@@ -251,7 +267,7 @@ const EVENTS = [
     description: 'Meantime Brewery HQ with 13 screens broadcasting every last match. Free entry, seated or standing.'
   },
   {
-    id: 'e7',
+    id: 'e7', city: 'london',
     title: 'Brazil vs Morocco — Bat & Ball Stratford',
     venue: 'Bat & Ball',
     address: 'Unit 1110/11, Montfichet Rd, Westfield Stratford, E20 1EJ',
@@ -265,7 +281,7 @@ const EVENTS = [
     description: '23 screens showing every single game. Free with £10 deposit per booking. Ping pong tables for half-time.'
   },
   {
-    id: 'e8',
+    id: 'e8', city: 'london',
     title: 'Brazil vs Morocco — Snoozebox Olympic Park',
     venue: 'Snoozebox Olympic Park',
     address: 'Pudding Mill Lane, Stratford, E15 2NQ',
@@ -283,7 +299,7 @@ const EVENTS = [
   // ENGLAND vs CROATIA — Tue 17 Jun, 21:00 BST
   // ══════════════════════════════════════════
   {
-    id: 'e9',
+    id: 'e9', city: 'london',
     title: 'England vs Croatia — Flat Iron Square',
     venue: 'Flat Iron Square',
     address: '45 Southwark St, London Bridge, SE1 9HP',
@@ -297,7 +313,7 @@ const EVENTS = [
     description: '16ft indoor Jumbotron, 10ft outdoor garden screens, 19 screens total, 16 beers on tap. DJs before and after every game.'
   },
   {
-    id: 'e10',
+    id: 'e10', city: 'london',
     title: 'England vs Croatia — The Garden Vauxhall',
     venue: 'The Garden Vauxhall',
     address: 'Fire Club & The Garden, Vauxhall, SW8',
@@ -311,7 +327,7 @@ const EVENTS = [
     description: 'Massive open-air beer garden with three LED screens. £10 for England matches, includes reserved spot.'
   },
   {
-    id: 'e11',
+    id: 'e11', city: 'london',
     title: 'England vs Croatia — Boxpark Wembley',
     venue: 'Boxpark Wembley',
     address: '18 Olympic Way, Wembley, HA9 0JT',
@@ -325,7 +341,7 @@ const EVENTS = [
     description: '4K TVs, table service, street food. Showing all matches across Camden, Croydon, Wembley and Shoreditch.'
   },
   {
-    id: 'e12',
+    id: 'e12', city: 'london',
     title: 'England vs Croatia — Rooftop Cinema Club Peckham',
     venue: 'Rooftop Cinema Club',
     address: "Bussey Building, 133 Rye Ln, Peckham, SE15 4ST",
@@ -339,7 +355,7 @@ const EVENTS = [
     description: 'Rooftop screening with city views, lounge seats, complimentary drink included. Also showing semi-finals and final.'
   },
   {
-    id: 'e13',
+    id: 'e13', city: 'london',
     title: 'England vs Croatia — Clapham Grand',
     venue: 'Clapham Grand',
     address: '21-25 St John\'s Hill, Clapham Junction, SW11 1TT',
@@ -353,7 +369,7 @@ const EVENTS = [
     description: '24-foot cinema screen on stage plus plasma TVs. Free beer before 7pm with ticket. Live music and DJs.'
   },
   {
-    id: 'e14',
+    id: 'e14', city: 'london',
     title: 'England vs Croatia — Big Penny Social',
     venue: 'Big Penny Social',
     address: '1 Priestley Way, Walthamstow, E17 6AL',
@@ -367,7 +383,7 @@ const EVENTS = [
     description: 'Billed as UK\'s biggest beer hall. Three gigantic screens, 100+ beer taps, live entertainment. £15 for knockouts.'
   },
   {
-    id: 'e15',
+    id: 'e15', city: 'london',
     title: 'England vs Croatia — Between The Bridges',
     venue: 'Between The Bridges',
     address: "The Queen's Walk, Waterloo, SE1 8XX",
@@ -381,7 +397,7 @@ const EVENTS = [
     description: 'Three giant video walls on the South Bank with the London skyline behind you. 7 food vendors, multiple bars.'
   },
   {
-    id: 'e16',
+    id: 'e16', city: 'london',
     title: 'England vs Croatia — Lost Oasis at Trafalgar Sq',
     venue: 'Lost Oasis',
     address: "St Martin-in-the-Fields, Trafalgar Square, WC2N 4JJ",
@@ -395,7 +411,7 @@ const EVENTS = [
     description: 'Lush green garden space by Trafalgar Sq. England watch parties presented by Pukka Pies. £10 includes drink voucher.'
   },
   {
-    id: 'e17',
+    id: 'e17', city: 'london',
     title: 'England vs Croatia — BrewDog Waterloo',
     venue: 'BrewDog Waterloo',
     address: 'Unit G, 1 The Sidings, Waterloo, SE1 7BH',
@@ -409,7 +425,7 @@ const EVENTS = [
     description: '11 projectors, 23 screens, live DJ, dedicated MC. Capacity ~1,800. Free entry with booking.'
   },
   {
-    id: 'e18',
+    id: 'e18', city: 'london',
     title: 'England vs Croatia — Eltham Park South Big Screen',
     venue: 'Eltham Park South',
     address: 'Eltham Park South, Eltham, SE9',
@@ -423,7 +439,7 @@ const EVENTS = [
     description: 'Open-air cinema big screen football. Gates open 7:30pm, kick-off 9pm BST.'
   },
   {
-    id: 'e19',
+    id: 'e19', city: 'london',
     title: 'England vs Croatia — Pop Brixton',
     venue: 'Pop Brixton',
     address: '49 Brixton Station Rd, Brixton, SW9 8PQ',
@@ -437,7 +453,7 @@ const EVENTS = [
     description: 'All England matches. DJs, multiple street food stalls, screens throughout. Reserved seating £15pp.'
   },
   {
-    id: 'e20',
+    id: 'e20', city: 'london',
     title: 'England vs Croatia — Kick Off Club at Outernet',
     venue: 'Kick Off Club — Outernet',
     address: 'Outernet, Denmark St, WC2H 8LB',
@@ -451,7 +467,7 @@ const EVENTS = [
     description: "London's largest indoor screen. Plus fan zones at Electric Brixton (Britpop vibes) and Colour Factory (lasers and club lighting)."
   },
   {
-    id: 'e21',
+    id: 'e21', city: 'london',
     title: 'England vs Croatia — 40ft Brewery',
     venue: '40ft Brewery',
     address: 'Blackhorse Road, Walthamstow, E17',
@@ -465,7 +481,7 @@ const EVENTS = [
     description: 'Huge LED screen in the yard. Partnership with Football Ramble podcast. Special tournament lager. Live DJs.'
   },
   {
-    id: 'e22',
+    id: 'e22', city: 'london',
     title: 'England vs Croatia — Vinegar Yard',
     venue: 'Vinegar Yard',
     address: '72-82 St Thomas St, London Bridge, SE1 3QU',
@@ -479,7 +495,7 @@ const EVENTS = [
     description: 'Urban garden with large alfresco LED screen. Ticket includes free drink token. Heating and covering.'
   },
   {
-    id: 'e23',
+    id: 'e23', city: 'london',
     title: 'England vs Croatia — Madison Rooftop',
     venue: 'Madison Rooftop',
     address: 'One New Change, St Paul\'s, EC4M 9AF',
@@ -493,7 +509,7 @@ const EVENTS = [
     description: 'Rooftop terrace with LED outdoor screen and views of St Paul\'s Cathedral. £22 includes beer.'
   },
   {
-    id: 'e24',
+    id: 'e24', city: 'london',
     title: 'England vs Croatia — Hackney Bridge',
     venue: 'Hackney Bridge',
     address: 'Echo Building, East Bay Lane, E15 2SJ',
@@ -511,7 +527,7 @@ const EVENTS = [
   // ENGLAND vs GHANA — Mon 23 Jun, 21:00 BST
   // ══════════════════════════════════════════
   {
-    id: 'e25',
+    id: 'e25', city: 'london',
     title: 'England vs Ghana — Between The Bridges',
     venue: 'Between The Bridges',
     address: "The Queen's Walk, Waterloo, SE1 8XX",
@@ -525,7 +541,7 @@ const EVENTS = [
     description: 'Three giant video walls on the South Bank. Tournament\'s biggest outdoor London screening.'
   },
   {
-    id: 'e26',
+    id: 'e26', city: 'london',
     title: 'England vs Ghana — Clapham Grand',
     venue: 'Clapham Grand',
     address: '21-25 St John\'s Hill, Clapham Junction, SW11 1TT',
@@ -539,7 +555,7 @@ const EVENTS = [
     description: '24-foot cinema screen plus plasmas. Free beer before 7pm. Live music and DJs all night.'
   },
   {
-    id: 'e27',
+    id: 'e27', city: 'london',
     title: 'England vs Ghana — Flat Iron Square',
     venue: 'Flat Iron Square',
     address: '45 Southwark St, London Bridge, SE1 9HP',
@@ -553,7 +569,7 @@ const EVENTS = [
     description: '16ft Jumbotron, 10ft outdoor screens, 19 screens total. Ticket includes free drink.'
   },
   {
-    id: 'e28',
+    id: 'e28', city: 'london',
     title: 'England vs Ghana — Brixton Jamm',
     venue: 'Brixton Jamm',
     address: '261 Brixton Rd, Brixton, SW9 6LH',
@@ -567,7 +583,7 @@ const EVENTS = [
     description: 'Giant 3m LED screen, retractable roofs, beach garden. £5.50 ticket includes a beer.'
   },
   {
-    id: 'e29',
+    id: 'e29', city: 'london',
     title: 'England vs Ghana — Queen of Hoxton',
     venue: 'Queen of Hoxton',
     address: '1 Curtain Rd, Shoreditch, EC2A 3JX',
@@ -585,7 +601,7 @@ const EVENTS = [
   // PANAMA vs ENGLAND — Sat 27 Jun, 22:00 BST
   // ══════════════════════════════════════════
   {
-    id: 'e30',
+    id: 'e30', city: 'london',
     title: 'Panama vs England — Boxhall City',
     venue: 'Boxhall City',
     address: 'Boxhall City, London',
@@ -599,7 +615,7 @@ const EVENTS = [
     description: 'Ticketed screening 7pm–12:30am. Street food from 14 independent London kitchens.'
   },
   {
-    id: 'e31',
+    id: 'e31', city: 'london',
     title: 'Panama vs England — The Garden Vauxhall',
     venue: 'The Garden Vauxhall',
     address: 'Fire Club & The Garden, Vauxhall, SW8',
@@ -613,7 +629,7 @@ const EVENTS = [
     description: 'Final group game in the massive Vauxhall beer garden. Three LED screens. Late licence.'
   },
   {
-    id: 'e32',
+    id: 'e32', city: 'london',
     title: 'Panama vs England — Big Penny Social',
     venue: 'Big Penny Social',
     address: '1 Priestley Way, Walthamstow, E17 6AL',
@@ -633,7 +649,7 @@ const EVENTS = [
   // as a representative non-England fixture
   // ══════════════════════════════════════════
   {
-    id: 'e33',
+    id: 'e33', city: 'london',
     title: 'All World Cup Matches — German Kraft Brewery',
     venue: 'German Kraft Brewery at Mercato Metropolitano',
     address: 'Mercato Metropolitano, 42 Newington Causeway, SE1 6DR',
@@ -647,7 +663,7 @@ const EVENTS = [
     description: 'Free entry. 700-capacity open-air screening. Every match shown on 20sqm screen. 50+ food stalls. 10 free pints every England or Germany goal.'
   },
   {
-    id: 'e34',
+    id: 'e34', city: 'london',
     title: 'All World Cup Matches — The Hippodrome',
     venue: 'Paddy\'s Sportsbook at The Hippodrome Casino',
     address: 'Cranbourn St, Leicester Square, WC2H 7JH',
@@ -661,7 +677,7 @@ const EVENTS = [
     description: '54 HD screens plus a 10-metre big screen. Every game. Open until 4am. Book a table or walk in.'
   },
   {
-    id: 'e35',
+    id: 'e35', city: 'london',
     title: 'All World Cup Matches — Mare Street Market',
     venue: 'Mare Street Market',
     address: '117 Mare St, Hackney, E8 4RU',
@@ -675,7 +691,7 @@ const EVENTS = [
     description: 'Every match in 10,000 sq ft space. Big screen plus three outdoor terrace screens. No booking fee.'
   },
   {
-    id: 'e36',
+    id: 'e36', city: 'london',
     title: 'All World Cup Matches — TOCA Social at The O2',
     venue: 'TOCA Social',
     address: 'The O2, Peninsula Square, Greenwich, SE10 0DX',
@@ -689,7 +705,7 @@ const EVENTS = [
     description: 'Every minute of every match. Standing from £5.50, tables from £10.60, private room for 30 from £583. All include a drink.'
   },
   {
-    id: 'e37',
+    id: 'e37', city: 'london',
     title: 'All World Cup Matches — Bar Kick Shoreditch',
     venue: 'Bar Kick',
     address: '127 Shoreditch High St, E1 6JE',
@@ -703,7 +719,7 @@ const EVENTS = [
     description: 'Free with £10 deposit per booking. 4K screens across two floors. Foosball tables for half-time.'
   },
   {
-    id: 'e38',
+    id: 'e38', city: 'london',
     title: 'All World Cup Matches — Five Points Taproom',
     venue: 'Five Points Taproom & Courtyard',
     address: '61 Mare St, Hackney, E8 4RG',
@@ -721,7 +737,7 @@ const EVENTS = [
   // SPAIN & BELGIUM DAY — Sun 21 Jun
   // ══════════════════════════════════════════
   {
-    id: 'e39',
+    id: 'e39', city: 'london',
     title: 'World Cup Day Party — Spain & Belgium Screenings',
     venue: 'ONO London at Pop Brixton',
     address: '49 Brixton Station Rd, Brixton, SW9 8PQ',
@@ -739,7 +755,7 @@ const EVENTS = [
   // FRANCE vs SENEGAL — Tue 16 Jun, 20:00 BST
   // ══════════════════════════════════════════
   {
-    id: 'e40',
+    id: 'e40', city: 'london',
     title: 'France vs Senegal — German Kraft Brewery',
     venue: 'German Kraft Brewery at Mercato Metropolitano',
     address: 'Mercato Metropolitano, 42 Newington Causeway, SE1 6DR',
@@ -753,7 +769,7 @@ const EVENTS = [
     description: 'Free entry. Showing every match on the 20sqm screen. 50+ food stalls surrounding.'
   },
   {
-    id: 'e41',
+    id: 'e41', city: 'london',
     title: 'France vs Senegal — Mestizo Camden',
     venue: 'Mestizo',
     address: '103 Hampstead Rd, Camden, NW1 3EL',
@@ -765,6 +781,458 @@ const EVENTS = [
     link: 'https://www.mestizomx.com',
     source: 'Londonist',
     description: "London's unofficial Mexican World Cup HQ. Open as a fan zone during the tournament. Mexican food and drink specials."
+  },
+
+  // ══════════════════════════════════════════
+  // MANCHESTER EVENTS
+  // ══════════════════════════════════════════
+  {
+    id: 'e42', city: 'manchester',
+    title: 'England vs Croatia — Victoria Baths',
+    venue: 'Victory at the Baths',
+    address: 'Victoria Baths, Hathersage Rd, Manchester, M13 0FE',
+    lat: 53.4600, lng: -2.2180,
+    date: '2026-06-17', time: '17:00',
+    matchId: 'm14',
+    type: 'ticketed', price: 'TBC',
+    vibe: 'Fan Zone', capacity: '500+',
+    link: 'https://www.skiddle.com/whats-on/Manchester/Victoria-Baths/',
+    source: 'Skiddle',
+    description: 'Historic Grade II* listed Edwardian baths transformed into a fan zone. DJs, bars, street food inside the empty gala pool.'
+  },
+  {
+    id: 'e43', city: 'manchester',
+    title: 'England vs Ghana — Victoria Baths',
+    venue: 'Victory at the Baths',
+    address: 'Victoria Baths, Hathersage Rd, Manchester, M13 0FE',
+    lat: 53.4600, lng: -2.2180,
+    date: '2026-06-23', time: '17:00',
+    matchId: 'm29',
+    type: 'ticketed', price: 'TBC',
+    vibe: 'Fan Zone', capacity: '500+',
+    link: 'https://www.skiddle.com/whats-on/Manchester/Victoria-Baths/',
+    source: 'Skiddle',
+    description: 'Second England group game at the converted Victorian baths. Street food, DJs, big screen.'
+  },
+  {
+    id: 'e44', city: 'manchester',
+    title: 'England vs Croatia — Gorilla',
+    venue: 'Gorilla',
+    address: '54-56 Whitworth St W, Manchester, M1 5WW',
+    lat: 53.4745, lng: -2.2498,
+    date: '2026-06-17', time: '20:00',
+    matchId: 'm14',
+    type: 'ticketed', price: 'TBC',
+    vibe: 'Indoor', capacity: '300',
+    link: 'https://www.skiddle.com/whats-on/Manchester/Gorilla/',
+    source: 'Skiddle',
+    description: 'Live music venue turned fan zone. Ticketed screening under the railway arches.'
+  },
+  {
+    id: 'e45', city: 'manchester',
+    title: 'England vs Croatia — Wandering Palate Monton',
+    venue: 'Wandering Palate Monton',
+    address: 'Monton, Eccles, Manchester, M30 9HG',
+    lat: 53.4815, lng: -2.3460,
+    date: '2026-06-17', time: '19:00',
+    matchId: 'm14',
+    type: 'ticketed', price: '£20',
+    vibe: 'Pub', capacity: '100',
+    link: 'https://www.skiddle.com/whats-on/Manchester/Wandering-Palate-Monton/',
+    source: 'Skiddle',
+    description: '£20 includes 4 drink tokens for any pints or small wines. Goals \'n grapes screening.'
+  },
+  {
+    id: 'e46', city: 'manchester',
+    title: 'England vs Ghana — Wandering Palate Monton',
+    venue: 'Wandering Palate Monton',
+    address: 'Monton, Eccles, Manchester, M30 9HG',
+    lat: 53.4815, lng: -2.3460,
+    date: '2026-06-23', time: '19:30',
+    matchId: 'm29',
+    type: 'ticketed', price: '£20',
+    vibe: 'Pub', capacity: '100',
+    link: 'https://www.skiddle.com/whats-on/Manchester/Wandering-Palate-Monton/',
+    source: 'Skiddle',
+    description: '£20 includes 4 drink tokens. Goals \'n grapes — second England group game.'
+  },
+  {
+    id: 'e47', city: 'manchester',
+    title: 'England vs Croatia — The Refuge',
+    venue: 'The Refuge',
+    address: 'Oxford St, Manchester, M60 7HA',
+    lat: 53.4752, lng: -2.2397,
+    date: '2026-06-17', time: '19:00',
+    matchId: 'm14',
+    type: 'ticketed', price: 'TBC',
+    vibe: 'Fan Zone', capacity: '500+',
+    link: 'https://www.skiddle.com/whats-on/Manchester/The-Refuge/',
+    source: 'Skiddle',
+    description: 'The Refuge World Cup Fan Zone in the former Principal Hotel. Multiple screens, cocktails.'
+  },
+  {
+    id: 'e48', city: 'manchester',
+    title: 'All England Matches — Joshua Brooks',
+    venue: 'Joshua Brooks',
+    address: '106 Princess St, Manchester, M1 6NG',
+    lat: 53.4735, lng: -2.2420,
+    date: '2026-06-17', time: '20:00',
+    matchId: 'm14',
+    type: 'ticketed', price: '£36',
+    vibe: 'Sports Bar', capacity: '200',
+    link: 'https://www.skiddle.com/whats-on/Manchester/Joshua-Brooks/',
+    source: 'Skiddle',
+    description: '£36 booth for group of 6, includes 6 free beers. All England group games shown.'
+  },
+  {
+    id: 'e49', city: 'manchester',
+    title: 'England Games — Creatures Comedy Club',
+    venue: 'Creatures Comedy Club',
+    address: 'Manchester, M1',
+    lat: 53.4780, lng: -2.2370,
+    date: '2026-06-23', time: '21:00',
+    matchId: 'm29',
+    type: 'free', price: null,
+    vibe: 'Indoor', capacity: '150',
+    link: 'https://www.skiddle.com/whats-on/Manchester/Creatures-Comedy-Club/',
+    source: 'Skiddle',
+    description: 'Free screening of England games. Intimate comedy club setting.'
+  },
+
+  // ══════════════════════════════════════════
+  // BIRMINGHAM EVENTS
+  // ══════════════════════════════════════════
+  {
+    id: 'e50', city: 'birmingham',
+    title: 'England vs Croatia — Luna Springs Fan Zone',
+    venue: 'Luna Springs',
+    address: 'Lower Trinity St, Digbeth, Birmingham, B9 4AG',
+    lat: 52.4745, lng: -1.8845,
+    date: '2026-06-17', time: '17:00',
+    matchId: 'm14',
+    type: 'ticketed', price: 'TBC',
+    vibe: 'Fan Zone', capacity: '1000+',
+    link: 'https://www.lunasprings.co.uk/world-cup-2026',
+    source: 'Skiddle',
+    description: "Birmingham's biggest World Cup fan zone. Massive screens, street food, DJs, ice-cold pints in Digbeth."
+  },
+  {
+    id: 'e51', city: 'birmingham',
+    title: 'England vs Ghana — Luna Springs Fan Zone',
+    venue: 'Luna Springs',
+    address: 'Lower Trinity St, Digbeth, Birmingham, B9 4AG',
+    lat: 52.4745, lng: -1.8845,
+    date: '2026-06-23', time: '17:00',
+    matchId: 'm29',
+    type: 'ticketed', price: 'TBC',
+    vibe: 'Fan Zone', capacity: '1000+',
+    link: 'https://www.lunasprings.co.uk/world-cup-2026',
+    source: 'Skiddle',
+    description: "Birmingham's biggest fan zone. Second England group game with live entertainment."
+  },
+  {
+    id: 'e52', city: 'birmingham',
+    title: 'England vs Panama — Luna Springs Fan Zone',
+    venue: 'Luna Springs',
+    address: 'Lower Trinity St, Digbeth, Birmingham, B9 4AG',
+    lat: 52.4745, lng: -1.8845,
+    date: '2026-06-27', time: '18:00',
+    matchId: 'm39',
+    type: 'ticketed', price: 'TBC',
+    vibe: 'Fan Zone', capacity: '1000+',
+    link: 'https://www.lunasprings.co.uk/world-cup-2026',
+    source: 'Skiddle',
+    description: "Final group game at Birmingham's biggest World Cup venue. Screens, food, DJs."
+  },
+  {
+    id: 'e53', city: 'birmingham',
+    title: 'England vs Croatia — Rosies Birmingham',
+    venue: 'Rosies Birmingham',
+    address: 'Birmingham, B1',
+    lat: 52.4800, lng: -1.8960,
+    date: '2026-06-17', time: '20:00',
+    matchId: 'm14',
+    type: 'free', price: null,
+    vibe: 'Sports Bar', capacity: '300',
+    link: 'https://www.skiddle.com/whats-on/Birmingham/Rosies-Birmingham/',
+    source: 'Skiddle',
+    description: 'Free entry for England matches. Big screens, drinks deals.'
+  },
+  {
+    id: 'e54', city: 'birmingham',
+    title: 'All World Cup Matches — TOCA Social Bullring',
+    venue: 'TOCA Social',
+    address: '11 St Martin\'s Walk, Bullring, Birmingham, B5 4BU',
+    lat: 52.4770, lng: -1.8930,
+    date: '2026-06-14', time: '17:00',
+    matchId: 'm5',
+    type: 'ticketed', price: '£5+',
+    vibe: 'Fan Zone', capacity: '500+',
+    link: 'https://www.toca.social/world-cup-screenings-at-toca-social',
+    source: 'TOCA Social',
+    description: 'Every single match shown live. £5 standing includes a drink. 23 boxes, 2 bars, interactive football games.'
+  },
+
+  // ══════════════════════════════════════════
+  // GLASGOW EVENTS
+  // ══════════════════════════════════════════
+  {
+    id: 'e55', city: 'glasgow',
+    title: 'Scotland vs Morocco — OVO Hydro',
+    venue: 'OVO Hydro',
+    address: 'Exhibition Way, Stobcross Rd, Glasgow, G3 8YW',
+    lat: 55.8601, lng: -4.2857,
+    date: '2026-06-19', time: '20:00',
+    matchId: 'm20',
+    type: 'ticketed', price: '£22+',
+    vibe: 'Fan Zone', capacity: '14000',
+    link: 'https://www.designmynight.com/glasgow/whats-on/watch-world-cup-2026-glasgow',
+    source: 'DesignMyNight',
+    description: 'Our Moment Live — arena transforms into 14,000-capacity fan zone. Live entertainment, house band, enormous screen.'
+  },
+  {
+    id: 'e56', city: 'glasgow',
+    title: 'Scotland vs Brazil — OVO Hydro',
+    venue: 'OVO Hydro',
+    address: 'Exhibition Way, Stobcross Rd, Glasgow, G3 8YW',
+    lat: 55.8601, lng: -4.2857,
+    date: '2026-06-24', time: '20:00',
+    matchId: 'm33',
+    type: 'ticketed', price: '£22+',
+    vibe: 'Fan Zone', capacity: '14000',
+    link: 'https://www.designmynight.com/glasgow/whats-on/watch-world-cup-2026-glasgow',
+    source: 'DesignMyNight',
+    description: 'Scotland vs Brazil on the biggest screen in Scotland. 14,000 fans under one roof.'
+  },
+  {
+    id: 'e57', city: 'glasgow',
+    title: 'Scotland vs Morocco — O2 Academy Glasgow',
+    venue: 'O2 Academy Glasgow',
+    address: '121 Eglinton St, Tradeston, Glasgow, G5 9NT',
+    lat: 55.8530, lng: -4.2610,
+    date: '2026-06-19', time: '20:00',
+    matchId: 'm20',
+    type: 'ticketed', price: '£17+',
+    vibe: 'Fan Zone', capacity: '2500',
+    link: 'https://www.designmynight.com/glasgow/whats-on/watch-world-cup-2026-glasgow',
+    source: 'DesignMyNight',
+    description: 'High-energy fan zone by 4thefans. DJs, special guests, anti-glare screens.'
+  },
+  {
+    id: 'e58', city: 'glasgow',
+    title: 'Scotland vs Morocco — Sloans',
+    venue: 'Sloans',
+    address: '62 Argyll Arcade, 108 Argyle St, Glasgow, G2 8BG',
+    lat: 55.8585, lng: -4.2550,
+    date: '2026-06-19', time: '21:00',
+    matchId: 'm20',
+    type: 'ticketed', price: '£11',
+    vibe: 'Pub', capacity: '100',
+    link: 'https://www.designmynight.com/glasgow/whats-on/watch-world-cup-2026-glasgow',
+    source: 'DesignMyNight',
+    description: '£11 includes halftime mac pie. Reserved seating, big screen, affordable food menu.'
+  },
+  {
+    id: 'e59', city: 'glasgow',
+    title: 'Scotland vs Morocco — Delmonica\'s',
+    venue: 'Delmonica\'s',
+    address: '68 Virginia St, Merchant City, Glasgow, G1 1TX',
+    lat: 55.8570, lng: -4.2460,
+    date: '2026-06-19', time: '21:00',
+    matchId: 'm20',
+    type: 'free', price: null,
+    vibe: 'Pub', capacity: '100',
+    link: 'https://www.designmynight.com/glasgow/whats-on/watch-world-cup-2026-glasgow',
+    source: 'DesignMyNight',
+    description: 'Free entry, multiple big screens with sound on. Pizza and drinks available.'
+  },
+  {
+    id: 'e60', city: 'glasgow',
+    title: 'Scotland Matches — Hampden Park',
+    venue: 'Barclays Hampden',
+    address: 'Hampden Park, Letherby Dr, Glasgow, G42 9BA',
+    lat: 55.8257, lng: -4.2520,
+    date: '2026-06-19', time: '20:00',
+    matchId: 'm20',
+    type: 'ticketed', price: '£69',
+    vibe: 'Fan Zone', capacity: '5000+',
+    link: 'https://www.designmynight.com/glasgow/whats-on/watch-world-cup-2026-glasgow',
+    source: 'DesignMyNight',
+    description: 'Premium experience at Scotland\'s national stadium. Complimentary drink, food voucher, live music, Q&A.'
+  },
+
+  // ══════════════════════════════════════════
+  // EDINBURGH EVENTS
+  // ══════════════════════════════════════════
+  {
+    id: 'e61', city: 'edinburgh',
+    title: 'Scotland vs Morocco — The Pitt FanPark',
+    venue: 'The Pitt',
+    address: '20 West Shore Rd, Granton, Edinburgh, EH5 1QD',
+    lat: 55.9810, lng: -3.2260,
+    date: '2026-06-19', time: '19:00',
+    matchId: 'm20',
+    type: 'ticketed', price: '£8+',
+    vibe: 'Outdoor', capacity: '1000+',
+    link: 'https://4thefans.tv/organiser/edinburgh/',
+    source: 'The Pitt',
+    description: 'Scotland\'s biggest FanPark in Granton. DJs, live acts, street food. Doors 7pm, kickoff 11pm. 18+.'
+  },
+  {
+    id: 'e62', city: 'edinburgh',
+    title: 'Scotland vs Brazil — The Pitt FanPark',
+    venue: 'The Pitt',
+    address: '20 West Shore Rd, Granton, Edinburgh, EH5 1QD',
+    lat: 55.9810, lng: -3.2260,
+    date: '2026-06-24', time: '19:00',
+    matchId: 'm33',
+    type: 'ticketed', price: '£8+',
+    vibe: 'Outdoor', capacity: '1000+',
+    link: 'https://4thefans.tv/organiser/edinburgh/',
+    source: 'The Pitt',
+    description: 'Scotland vs Brazil at Edinburgh\'s biggest outdoor fan park. DJs, food, bars. 18+.'
+  },
+
+  // ══════════════════════════════════════════
+  // LIVERPOOL EVENTS
+  // ══════════════════════════════════════════
+  {
+    id: 'e63', city: 'liverpool',
+    title: 'England vs Croatia — BOXPARK Liverpool',
+    venue: 'BOXPARK Liverpool',
+    address: 'Cains Brewery Village, Baltic Triangle, Liverpool, L8 5RN',
+    lat: 53.3920, lng: -2.9780,
+    date: '2026-06-17', time: '18:00',
+    matchId: 'm14',
+    type: 'ticketed', price: 'TBC',
+    vibe: 'Fan Zone', capacity: '1500',
+    link: 'https://www.boxpark.co.uk/venues/liverpool/sports-bar/where-to-watch-the-world-cup',
+    source: 'BOXPARK',
+    description: "The city's home of the fan. 1,500-capacity hall, massive screen, pre-match DJs, live hosts, street food."
+  },
+  {
+    id: 'e64', city: 'liverpool',
+    title: 'England vs Ghana — BOXPARK Liverpool',
+    venue: 'BOXPARK Liverpool',
+    address: 'Cains Brewery Village, Baltic Triangle, Liverpool, L8 5RN',
+    lat: 53.3920, lng: -2.9780,
+    date: '2026-06-23', time: '18:00',
+    matchId: 'm29',
+    type: 'ticketed', price: 'TBC',
+    vibe: 'Fan Zone', capacity: '1500',
+    link: 'https://www.boxpark.co.uk/venues/liverpool/sports-bar/where-to-watch-the-world-cup',
+    source: 'BOXPARK',
+    description: 'Second group game at BOXPARK. Giant screen, street food, bars, football legend appearances.'
+  },
+
+  // ══════════════════════════════════════════
+  // LEEDS EVENTS
+  // ══════════════════════════════════════════
+  {
+    id: 'e65', city: 'leeds',
+    title: 'All World Cup Matches — Canal Club',
+    venue: 'Canal Club',
+    address: 'Canal Club, Granary Wharf, Leeds, LS1 4BR',
+    lat: 53.7935, lng: -1.5510,
+    date: '2026-06-14', time: '17:00',
+    matchId: 'm5',
+    type: 'free', price: null,
+    vibe: 'Pub', capacity: '200',
+    link: 'https://www.canalclub.co.uk/events-offers/world-cup-2026/',
+    source: 'Skiddle',
+    description: 'Free tickets, big screens, bars, good food for every match. Leeds\' newest pub by the canal.'
+  },
+  {
+    id: 'e66', city: 'leeds',
+    title: 'England vs Croatia — 4TheFans O2 Academy Leeds',
+    venue: 'O2 Academy Leeds',
+    address: '55 Cookridge St, Leeds, LS2 3AW',
+    lat: 53.8010, lng: -1.5470,
+    date: '2026-06-17', time: '18:00',
+    matchId: 'm14',
+    type: 'ticketed', price: 'TBC',
+    vibe: 'Fan Zone', capacity: '2000+',
+    link: 'https://www.football-fanzone.com/',
+    source: 'eurochange',
+    description: 'Anti-glare screens, quality sound, food and drink stalls, live DJs. 4TheFans fan park.'
+  },
+
+  // ══════════════════════════════════════════
+  // BRISTOL EVENTS
+  // ══════════════════════════════════════════
+  {
+    id: 'e67', city: 'bristol',
+    title: 'England vs Croatia — Clock Factory',
+    venue: 'Clock Factory',
+    address: '63 Union St, Bristol, BS1 2DU',
+    lat: 51.4530, lng: -2.5920,
+    date: '2026-06-17', time: '19:00',
+    matchId: 'm14',
+    type: 'free', price: null,
+    vibe: 'Indoor', capacity: '300',
+    link: 'https://www.headfirstbristol.co.uk/whats-on/clock-factory',
+    source: 'Headfirst Bristol',
+    description: 'Free entry, first come first served. £5 seat reservations available. Massive 16ft screen with VOID Acoustics.'
+  },
+  {
+    id: 'e68', city: 'bristol',
+    title: 'England vs Panama — Clock Factory',
+    venue: 'Clock Factory',
+    address: '63 Union St, Bristol, BS1 2DU',
+    lat: 51.4530, lng: -2.5920,
+    date: '2026-06-27', time: '19:00',
+    matchId: 'm39',
+    type: 'free', price: null,
+    vibe: 'Indoor', capacity: '300',
+    link: 'https://www.headfirstbristol.co.uk/whats-on/clock-factory',
+    source: 'Headfirst Bristol',
+    description: 'Free entry for the final group game. 16ft screen, VOID Acoustics sound system.'
+  },
+
+  // ══════════════════════════════════════════
+  // NEWCASTLE EVENTS
+  // ══════════════════════════════════════════
+  {
+    id: 'e69', city: 'newcastle',
+    title: 'England vs Croatia — Bally\'s Casino',
+    venue: 'Bally\'s Casino',
+    address: 'The Gate, Newgate St, Newcastle, NE1 5TG',
+    lat: 54.9740, lng: -1.6155,
+    date: '2026-06-17', time: '21:00',
+    matchId: 'm14',
+    type: 'ticketed', price: 'TBC',
+    vibe: 'Sports Bar', capacity: '500+',
+    link: 'https://www.skiddle.com/whats-on/Newcastle/Ballys-Casino/',
+    source: 'Skiddle',
+    description: '44 screens across the venue including giant screens. Gaming, poker, bars, dining under one roof at The Gate.'
+  },
+  {
+    id: 'e70', city: 'newcastle',
+    title: 'England vs Ghana — Bally\'s Casino',
+    venue: 'Bally\'s Casino',
+    address: 'The Gate, Newgate St, Newcastle, NE1 5TG',
+    lat: 54.9740, lng: -1.6155,
+    date: '2026-06-23', time: '21:00',
+    matchId: 'm29',
+    type: 'ticketed', price: 'TBC',
+    vibe: 'Sports Bar', capacity: '500+',
+    link: 'https://www.skiddle.com/whats-on/Newcastle/Ballys-Casino/',
+    source: 'Skiddle',
+    description: 'Second England group game. 4K screens, Carling Bar for matchdays, food and drinks.'
+  },
+  {
+    id: 'e71', city: 'newcastle',
+    title: 'England vs Panama — Bally\'s Casino',
+    venue: 'Bally\'s Casino',
+    address: 'The Gate, Newgate St, Newcastle, NE1 5TG',
+    lat: 54.9740, lng: -1.6155,
+    date: '2026-06-27', time: '22:00',
+    matchId: 'm39',
+    type: 'ticketed', price: 'TBC',
+    vibe: 'Sports Bar', capacity: '500+',
+    link: 'https://www.skiddle.com/whats-on/Newcastle/Ballys-Casino/',
+    source: 'Skiddle',
+    description: 'Final group game on the 4K screens. Dedicated viewing areas, food and drinks.'
   },
 ];
 
