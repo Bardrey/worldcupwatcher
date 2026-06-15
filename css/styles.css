@@ -412,7 +412,7 @@ input {
   top: 0;
   z-index: 50;
   background: var(--bg);
-  padding: 24px 16px 10px;
+  padding: 32px 16px 10px;
   max-width: 640px;
   margin: 0 auto;
   transition: padding 0.2s;
@@ -601,11 +601,6 @@ input {
    Match Highlight Banner
    ============================================ */
 .match-highlight {
-  position: fixed;
-  top: var(--top-bar-height);
-  left: 0;
-  right: 0;
-  z-index: 100;
   background: var(--gradient-primary);
 }
 
@@ -663,10 +658,6 @@ input {
   bottom: var(--nav-height);
   overflow-y: auto;
   overflow-x: hidden;
-}
-
-.content-area.has-highlight {
-  top: calc(var(--top-bar-height) + 44px);
 }
 
 /* ============================================

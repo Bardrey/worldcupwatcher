@@ -764,7 +764,6 @@
   function updateMatchHighlight() {
     if (!state.favouriteTeam) {
       $matchHighlight.hidden = true;
-      $contentArea.classList.remove('has-highlight');
       return;
     }
 
@@ -776,7 +775,6 @@
 
     if (!nextMatch) {
       $matchHighlight.hidden = true;
-      $contentArea.classList.remove('has-highlight');
       return;
     }
 
@@ -788,7 +786,6 @@
     document.getElementById('hl-match-time').textContent = `${formatDate(nextMatch.date)} ${nextMatch.time}`;
 
     $matchHighlight.hidden = false;
-    $contentArea.classList.add('has-highlight');
   }
 
   // ── Team Badge ─────────────────────────────
@@ -945,7 +942,6 @@
       $subControls.hidden = true;
       $matchHighlight.hidden = true;
       $btnOpenMap.hidden = true;
-      $contentArea.classList.remove('has-highlight');
       renderFixtures();
       const scrollTarget = document.getElementById('fixture-scroll-target');
       if (scrollTarget) {
