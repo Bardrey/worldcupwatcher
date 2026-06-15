@@ -459,6 +459,11 @@
       return da - db;
     });
 
+    const todayStr = new Date().toISOString().slice(0, 10);
+    // Find the closest date to scroll to: today if matches exist, otherwise the next upcoming date
+    const allDates = [...new Set(sortedMatches.map(m => m.date))].sort();
+    const scrollToDate = allDates.find(d => d >= todayStr) || allDates[allDates.length - 1];
+
     let lastDate = '';
 
     sortedMatches.forEach(match => {
@@ -470,7 +475,9 @@
 
       if (match.date !== lastDate) {
         lastDate = match.date;
-        html += `<div class="fixture-date-label">${formatDate(match.date)}</div>`;
+        const isToday = match.date === todayStr;
+        const isScrollTarget = match.date === scrollToDate;
+        html += `<div class="fixture-date-label${isToday ? ' today' : ''}" ${isScrollTarget ? 'id="fixture-scroll-target"' : ''}>${formatDate(match.date)}${isToday ? '<span class="today-badge">TODAY</span>' : ''}</div>`;
       }
 
       html += `<div class="fixture-row${isPlayed ? ' played' : ''}${isHighlight ? ' highlight' : ''}${screenings > 0 && !isPlayed ? ' has-screenings' : ''}" data-match-id="${match.id}">
@@ -791,8 +798,11 @@
       $contentArea.classList.remove('has-highlight');
       $contentArea.classList.add('no-filters');
       renderFixtures();
-      // Always scroll to top when entering fixtures
-      document.querySelector('.list-view').scrollTop = 0;
+      // Scroll to today's date (or nearest upcoming)
+      const scrollTarget = document.getElementById('fixture-scroll-target');
+      if (scrollTarget) {
+        scrollTarget.scrollIntoView({ block: 'start' });
+      }
     } else {
       $filterBar.hidden = false;
       $btnOpenMap.hidden = false;

@@ -1274,6 +1274,24 @@ input {
   border-bottom: 2px solid var(--border);
   text-transform: uppercase;
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.fixture-date-label.today {
+  color: var(--text);
+  border-bottom-color: var(--canada-red);
+  border-bottom-width: 3px;
+}
+
+.today-badge {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  background: var(--canada-red);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 6px;
 }
 
 .fixture-row {
