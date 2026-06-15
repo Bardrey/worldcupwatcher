@@ -115,22 +115,13 @@
     <div id="map-card" class="map-card" hidden></div>
   </div>
 
-  <!-- Sign In Modal -->
-  <div id="signin-modal" class="modal" hidden>
-    <div class="modal-backdrop"></div>
-    <div class="modal-content signin-content">
-      <button class="modal-close" aria-label="Close">&times;</button>
-      <h3>SIGN IN TO SAVE FAVOURITES</h3>
-      <p class="signin-sub">Save your favourite venues so you never miss a screening.</p>
-      <div class="signin-buttons">
-        <button class="signin-btn apple" id="signin-apple">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="currentColor"><path d="M14.94 13.42c-.33.76-.49 1.1-.91 1.77-.59.93-1.42 2.1-2.45 2.11-1.15.01-1.45-.75-3.01-.74-1.56.01-1.89.76-3.04.75-1.03-.01-1.82-1.05-2.41-1.99C1.64 12.88 1.5 10.11 2.52 8.65c.73-1.03 1.88-1.64 2.97-1.64 1.1 0 1.8.75 2.71.75.89 0 1.43-.76 2.72-.76.97 0 1.99.53 2.72 1.44-2.39 1.31-2 4.72.3 5.98zM11.28 5.4c.46-.59.81-1.42.68-2.27-.75.05-1.63.53-2.14 1.15-.46.56-.85 1.4-.7 2.22.82.03 1.67-.46 2.16-1.1z"/></svg>
-          Continue with Apple
-        </button>
-        <button class="signin-btn google" id="signin-google">
-          <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/><path d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/></svg>
-          Continue with Google
-        </button>
+  <!-- Cookie Consent Banner -->
+  <div id="cookie-banner" class="cookie-banner" hidden>
+    <div class="cookie-inner">
+      <p class="cookie-text">Allow cookies to save your favourites between visits?</p>
+      <div class="cookie-actions">
+        <button id="cookie-accept" class="cookie-btn accept">Accept</button>
+        <button id="cookie-decline" class="cookie-btn decline">No thanks</button>
       </div>
     </div>
   </div>

@@ -910,56 +910,76 @@ input {
   font-weight: 700;
 }
 
-/* ── Sign-In Modal ───────────────────────── */
-.signin-content {
-  text-align: center;
+/* ── Cookie Consent Banner ───────────────── */
+.cookie-banner {
+  position: fixed;
+  bottom: calc(var(--nav-height) + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 400px;
+  z-index: 200;
+  animation: slideUp 0.3s ease-out;
 }
 
-.signin-sub {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin: 8px 0 24px;
-  line-height: 1.5;
+@keyframes slideUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
-.signin-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.signin-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-  padding: 14px 20px;
-  border-radius: 12px;
-  border: 2px solid var(--border);
+.cookie-inner {
   background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+}
+
+.cookie-text {
   font-family: var(--font-sans);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
   color: var(--text);
+  margin: 0 0 12px;
+  line-height: 1.4;
+}
+
+.cookie-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.cookie-btn {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   cursor: pointer;
   transition: all 0.15s;
 }
 
-.signin-btn:hover {
+.cookie-btn.accept {
+  background: var(--text);
+  color: var(--bg);
   border-color: var(--text);
-  transform: translateY(-1px);
 }
 
-.signin-btn.apple {
-  background: #000;
-  color: #fff;
-  border-color: #000;
+.cookie-btn.accept:hover {
+  opacity: 0.85;
 }
 
-.signin-btn.apple:hover {
-  background: #222;
-  border-color: #222;
+.cookie-btn.decline {
+  background: var(--surface);
+  color: var(--text-muted);
+}
+
+.cookie-btn.decline:hover {
+  border-color: var(--text-muted);
 }
 
 /* ============================================

@@ -14,9 +14,8 @@
     map: null,
     markers: [],
     shareEventId: null,
-    signedIn: false,
-    userName: null,
     savedEvents: [],
+    cookieConsent: null, // null = not asked, true = accepted, false = declined
     teamFilter: false,
     matchFilter: null,       // matchId to filter upcoming events
     fixturesSubTab: 'matches', // 'matches' or 'standings'
@@ -83,36 +82,43 @@
     localStorage.setItem('wcw_team', code);
   }
 
-  function loadAuth() {
-    const auth = localStorage.getItem('wcw_auth');
-    if (auth) {
-      const parsed = JSON.parse(auth);
-      state.signedIn = true;
-      state.userName = parsed.name;
+  function loadCookieConsent() {
+    const consent = localStorage.getItem('wcw_cookie_consent');
+    if (consent !== null) {
+      state.cookieConsent = consent === 'true';
     }
   }
 
-  function saveAuth(name, provider) {
-    state.signedIn = true;
-    state.userName = name;
-    localStorage.setItem('wcw_auth', JSON.stringify({ name, provider }));
+  function saveCookieConsent(accepted) {
+    state.cookieConsent = accepted;
+    localStorage.setItem('wcw_cookie_consent', String(accepted));
+    if (!accepted) {
+      localStorage.removeItem('wcw_saved');
+      state.savedEvents = [];
+    }
   }
 
   function loadSavedEvents() {
-    const saved = localStorage.getItem('wcw_saved');
-    state.savedEvents = saved ? JSON.parse(saved) : [];
+    if (state.cookieConsent) {
+      const saved = localStorage.getItem('wcw_saved');
+      state.savedEvents = saved ? JSON.parse(saved) : [];
+    }
   }
 
   function saveFavourite(eventId) {
     if (!state.savedEvents.includes(eventId)) {
       state.savedEvents.push(eventId);
-      localStorage.setItem('wcw_saved', JSON.stringify(state.savedEvents));
+      if (state.cookieConsent) {
+        localStorage.setItem('wcw_saved', JSON.stringify(state.savedEvents));
+      }
     }
   }
 
   function removeFavourite(eventId) {
     state.savedEvents = state.savedEvents.filter(id => id !== eventId);
-    localStorage.setItem('wcw_saved', JSON.stringify(state.savedEvents));
+    if (state.cookieConsent) {
+      localStorage.setItem('wcw_saved', JSON.stringify(state.savedEvents));
+    }
   }
 
   function isFavourited(eventId) {
@@ -133,7 +139,6 @@
   const $btnTeamChange = document.getElementById('btn-team-change');
   const $shareModal = document.getElementById('share-modal');
   const $mapCard = document.getElementById('map-card');
-  const $signinModal = document.getElementById('signin-modal');
   const $mapMode = document.getElementById('map-mode');
   const $btnOpenMap = document.getElementById('btn-open-map');
   const $btnCloseMap = document.getElementById('btn-close-map');
@@ -157,6 +162,7 @@
         saveTeam(code);
         hideOverlay();
         init();
+        showCookieBannerIfNeeded();
       });
     });
   }
@@ -179,6 +185,7 @@
   $skipTeam.addEventListener('click', () => {
     hideOverlay();
     init();
+    showCookieBannerIfNeeded();
   });
 
   $btnTeamChange.addEventListener('click', () => {
@@ -297,20 +304,10 @@
       $eventList.innerHTML = html;
       $noResults.hidden = false;
       if (state.currentTab === 'favourites') {
-        if (!state.signedIn) {
-          $noResults.innerHTML = `
-            <p>SAVE YOUR FAVOURITES</p>
-            <span>Sign in to save venues you love and never miss a screening.</span>
-            <button class="empty-cta" onclick="document.getElementById('signin-modal').hidden=false">
-              SIGN IN
-            </button>
-          `;
-        } else {
-          $noResults.innerHTML = `
-            <p>NO FAVOURITES YET</p>
-            <span>Tap the heart on any event to save it here.</span>
-          `;
-        }
+        $noResults.innerHTML = `
+          <p>NO FAVOURITES YET</p>
+          <span>Tap the heart on any event to save it here.</span>
+        `;
       } else if (state.currentTab === 'upcoming' && state.matchFilter) {
         const match = getMatch(state.matchFilter);
         $noResults.innerHTML = `
@@ -393,10 +390,6 @@
     document.querySelectorAll('.fav-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (!state.signedIn) {
-          $signinModal.hidden = false;
-          return;
-        }
         const eventId = btn.dataset.favId;
         if (isFavourited(eventId)) {
           removeFavourite(eventId);
@@ -823,28 +816,28 @@
     renderCurrentTab();
   }
 
-  // ── Sign-In Modal ──────────────────────────
-  $signinModal.querySelector('.modal-backdrop').addEventListener('click', () => {
-    $signinModal.hidden = true;
-  });
-  $signinModal.querySelector('.modal-close').addEventListener('click', () => {
-    $signinModal.hidden = true;
-  });
+  // ── Cookie Banner ──────────────────────────
+  const $cookieBanner = document.getElementById('cookie-banner');
 
-  document.getElementById('signin-apple').addEventListener('click', () => {
-    saveAuth('Apple User', 'apple');
-    $signinModal.hidden = true;
+  function showCookieBannerIfNeeded() {
+    if (state.cookieConsent === null) {
+      $cookieBanner.hidden = false;
+    }
+  }
+
+  document.getElementById('cookie-accept').addEventListener('click', () => {
+    saveCookieConsent(true);
+    $cookieBanner.hidden = true;
     renderCurrentTab();
   });
 
-  document.getElementById('signin-google').addEventListener('click', () => {
-    saveAuth('Google User', 'google');
-    $signinModal.hidden = true;
-    renderCurrentTab();
+  document.getElementById('cookie-decline').addEventListener('click', () => {
+    saveCookieConsent(false);
+    $cookieBanner.hidden = true;
   });
 
   // ── Boot ───────────────────────────────────
-  loadAuth();
+  loadCookieConsent();
   loadSavedEvents();
 
   const savedTeam = loadTeam();
@@ -852,6 +845,7 @@
     state.favouriteTeam = savedTeam;
     hideOverlay();
     init();
+    showCookieBannerIfNeeded();
   } else {
     renderTeamGrid();
   }
