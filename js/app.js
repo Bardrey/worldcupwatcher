@@ -19,6 +19,9 @@
     teamFilter: false,
     matchFilter: null,       // matchId to filter upcoming events
     fixturesSubTab: 'matches', // 'matches' or 'standings'
+    mapTodayOnly: false,
+    userLocation: null,
+    userMarker: null,
   };
 
   // ── Helpers ────────────────────────────────
@@ -203,6 +206,8 @@
     document.body.style.overflow = 'hidden';
     initMap();
     renderMapMarkers();
+    requestUserLocation();
+    updateMapTodayToggle();
   }
 
   function closeMapMode() {
@@ -212,6 +217,45 @@
     $mapCard.hidden = true;
     document.body.style.overflow = '';
   }
+
+  function requestUserLocation() {
+    if (state.userLocation) {
+      showUserOnMap(state.userLocation);
+      return;
+    }
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        state.userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        showUserOnMap(state.userLocation);
+      },
+      () => {},
+      { enableHighAccuracy: false, timeout: 8000 }
+    );
+  }
+
+  function showUserOnMap(loc) {
+    if (!state.map) return;
+    if (state.userMarker) state.map.removeLayer(state.userMarker);
+    const icon = L.divIcon({
+      className: 'user-location-marker',
+      html: '<div class="user-dot"><div class="user-dot-pulse"></div></div>',
+      iconSize: [20, 20],
+      iconAnchor: [10, 10],
+    });
+    state.userMarker = L.marker([loc.lat, loc.lng], { icon, interactive: false }).addTo(state.map);
+  }
+
+  function updateMapTodayToggle() {
+    const btn = document.getElementById('map-today-toggle');
+    if (btn) btn.classList.toggle('active', state.mapTodayOnly);
+  }
+
+  document.getElementById('map-today-toggle').addEventListener('click', () => {
+    state.mapTodayOnly = !state.mapTodayOnly;
+    updateMapTodayToggle();
+    renderMapMarkers();
+  });
 
   // ── Filter Chips ───────────────────────────
   document.querySelectorAll('.filter-chip').forEach(chip => {
@@ -687,7 +731,11 @@
     state.markers.forEach(m => state.map.removeLayer(m));
     state.markers = [];
 
-    const events = getFilteredEvents();
+    let events = getFilteredEvents();
+    if (state.mapTodayOnly) {
+      const today = new Date().toISOString().slice(0, 10);
+      events = events.filter(e => e.date === today);
+    }
 
     events.forEach(event => {
       const isRecommended = state.favouriteTeam && eventMatchesTeam(event, state.favouriteTeam);
