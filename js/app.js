@@ -318,6 +318,7 @@
   function toggleFilterPanel() {
     state.filterPanelOpen = !state.filterPanelOpen;
     $filterPanel.hidden = !state.filterPanelOpen;
+    $btnOpenMap.hidden = state.filterPanelOpen;
     if (state.filterPanelOpen) {
       populateCountryFilters();
       syncFilterPillStates();
@@ -368,12 +369,15 @@
     }
   });
 
-  document.getElementById('filters-apply').addEventListener('click', () => {
+  function closeFilterPanel() {
     state.filterPanelOpen = false;
     $filterPanel.hidden = true;
     updateFiltersBtnState();
     renderCurrentTab();
-  });
+  }
+
+  document.getElementById('filters-apply').addEventListener('click', closeFilterPanel);
+  document.getElementById('filters-close').addEventListener('click', closeFilterPanel);
 
   document.getElementById('filters-clear').addEventListener('click', () => {
     state.typeFilters = [];

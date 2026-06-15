@@ -94,29 +94,6 @@
       </div>
     </div>
 
-    <!-- Filter Panel (hidden dropdown) -->
-    <div id="filter-panel" class="filter-panel" hidden>
-      <div class="filter-section">
-        <span class="filter-section-label">TYPE</span>
-        <div class="filter-options" id="type-filters">
-          <button class="filter-pill" data-filter="free">Free</button>
-          <button class="filter-pill" data-filter="ticketed">Ticketed</button>
-          <button class="filter-pill" data-filter="fan-zone">Fan Zones</button>
-          <button class="filter-pill" data-filter="pub">Pubs</button>
-          <button class="filter-pill" data-filter="outdoor">Outdoor</button>
-          <button class="filter-pill" data-filter="rooftop">Rooftops</button>
-        </div>
-      </div>
-      <div class="filter-section">
-        <span class="filter-section-label">COUNTRY</span>
-        <div class="filter-options" id="country-filters"></div>
-      </div>
-      <div class="filter-panel-actions">
-        <button id="filters-clear" class="filter-action-btn clear">Clear all</button>
-        <button id="filters-apply" class="filter-action-btn apply">Show results</button>
-      </div>
-    </div>
-
     <div id="list-view" class="list-view">
       <div id="event-list" class="event-list"></div>
       <div id="no-results" class="no-results" hidden>
@@ -125,6 +102,33 @@
       </div>
     </div>
   </main>
+
+  <!-- Filter Panel (full overlay) -->
+  <div id="filter-panel" class="filter-panel" hidden>
+    <div class="filter-panel-header">
+      <span class="filter-panel-title">FILTERS</span>
+      <button id="filters-close" class="filter-panel-close" aria-label="Close">&times;</button>
+    </div>
+    <div class="filter-section">
+      <span class="filter-section-label">TYPE</span>
+      <div class="filter-options" id="type-filters">
+        <button class="filter-pill" data-filter="free">Free</button>
+        <button class="filter-pill" data-filter="ticketed">Ticketed</button>
+        <button class="filter-pill" data-filter="fan-zone">Fan Zones</button>
+        <button class="filter-pill" data-filter="pub">Pubs</button>
+        <button class="filter-pill" data-filter="outdoor">Outdoor</button>
+        <button class="filter-pill" data-filter="rooftop">Rooftops</button>
+      </div>
+    </div>
+    <div class="filter-section">
+      <span class="filter-section-label">COUNTRY</span>
+      <div class="filter-options" id="country-filters"></div>
+    </div>
+    <div class="filter-panel-actions">
+      <button id="filters-clear" class="filter-action-btn clear">Clear all</button>
+      <button id="filters-apply" class="filter-action-btn apply">Show results</button>
+    </div>
+  </div>
 
   <!-- Floating Map Button -->
   <button id="btn-open-map" class="floating-map-btn">
