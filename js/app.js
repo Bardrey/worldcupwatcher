@@ -304,6 +304,31 @@
     renderMapMarkers();
   });
 
+  // ── Locate Me ─────────────────────────────
+  const $locateBtn = document.getElementById('btn-locate-me');
+
+  $locateBtn.addEventListener('click', () => {
+    if (state.userLocation) {
+      showUserOnMap(state.userLocation);
+      state.map.setView([state.userLocation.lat, state.userLocation.lng], 14, { animate: true });
+      return;
+    }
+    if (!navigator.geolocation) return;
+    $locateBtn.classList.add('locating');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        state.userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        showUserOnMap(state.userLocation);
+        state.map.setView([state.userLocation.lat, state.userLocation.lng], 14, { animate: true });
+        $locateBtn.classList.remove('locating');
+      },
+      () => {
+        $locateBtn.classList.remove('locating');
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  });
+
   // ── Filter Panel ────────────────────────────
   function populateCountryFilters() {
     const countries = TEAMS_2026.map(t => ({ code: t.code, name: t.name, flag: t.flag }));

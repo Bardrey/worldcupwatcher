@@ -1274,6 +1274,34 @@ input {
   position: static;
 }
 
+/* ── Locate Me Button ────────────────────── */
+.map-locate-btn {
+  position: absolute;
+  bottom: 100px;
+  right: 12px;
+  z-index: 1000;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: all 0.15s;
+}
+
+.map-locate-btn:hover {
+  background: var(--bg);
+}
+
+.map-locate-btn.locating {
+  color: #4285F4;
+}
+
 /* ── User Location Marker ───────────────── */
 .user-location-marker {
   background: none !important;
