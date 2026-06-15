@@ -413,6 +413,11 @@ input {
   background: var(--surface);
   z-index: 99;
   border-bottom: 2px solid var(--border);
+  transition: top 0.15s;
+}
+
+.filter-bar.has-highlight {
+  top: calc(var(--top-bar-height) + 44px);
 }
 
 .filter-scroll {
@@ -460,10 +465,10 @@ input {
    ============================================ */
 .match-highlight {
   position: fixed;
-  top: calc(var(--top-bar-height) + var(--filter-height));
+  top: var(--top-bar-height);
   left: 0;
   right: 0;
-  z-index: 98;
+  z-index: 100;
   background: var(--gradient-primary);
 }
 
@@ -523,7 +528,7 @@ input {
 }
 
 .content-area.has-highlight {
-  top: calc(var(--top-bar-height) + var(--filter-height) + 44px);
+  top: calc(var(--top-bar-height) + 44px + var(--filter-height));
 }
 
 .content-area.no-filters {

@@ -620,9 +620,11 @@
 
   // ── Match Highlight Banner ─────────────────
   function updateMatchHighlight() {
+    const $filterBar = document.querySelector('.filter-bar');
     if (!state.favouriteTeam) {
       $matchHighlight.hidden = true;
       $contentArea.classList.remove('has-highlight');
+      $filterBar.classList.remove('has-highlight');
       return;
     }
 
@@ -636,6 +638,7 @@
     if (!nextMatch) {
       $matchHighlight.hidden = true;
       $contentArea.classList.remove('has-highlight');
+      $filterBar.classList.remove('has-highlight');
       return;
     }
 
@@ -648,6 +651,7 @@
 
     $matchHighlight.hidden = false;
     $contentArea.classList.add('has-highlight');
+    $filterBar.classList.add('has-highlight');
   }
 
   // ── Team Badge ─────────────────────────────
