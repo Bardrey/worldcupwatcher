@@ -402,25 +402,46 @@ input {
 }
 
 /* ============================================
-   City Selector Bar
+   Sub-header (sticky title + controls)
    ============================================ */
-.city-bar {
-  position: fixed;
-  top: var(--top-bar-height);
-  left: 0;
-  right: 0;
-  height: 40px;
+.sub-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
   background: var(--bg);
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: top 0.15s;
+  padding: 16px 16px 10px;
+  max-width: 640px;
+  margin: 0 auto;
+  transition: padding 0.2s;
 }
 
-.city-bar.has-highlight {
-  top: calc(var(--top-bar-height) + 44px);
+.sub-header.compact .sub-title {
+  font-size: 14px;
+  margin-bottom: 6px;
 }
+
+.sub-header.compact {
+  padding: 8px 16px 6px;
+}
+
+.sub-title {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text);
+  margin-bottom: 10px;
+  transition: font-size 0.2s, margin 0.2s;
+}
+
+.sub-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.sub-controls[hidden] { display: none; }
 
 .city-select {
   appearance: none;
@@ -428,7 +449,7 @@ input {
   background: var(--surface);
   border: 2px solid var(--border);
   border-radius: 20px;
-  padding: 6px 28px 6px 14px;
+  padding: 7px 28px 7px 12px;
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 700;
@@ -447,63 +468,130 @@ input {
   border-color: var(--text);
 }
 
-/* ============================================
-   Filter Bar
-   ============================================ */
-.filter-bar {
-  position: fixed;
-  top: calc(var(--top-bar-height) + 40px);
-  left: 0;
-  right: 0;
-  height: var(--filter-height);
-  background: var(--surface);
-  z-index: 99;
-  border-bottom: 2px solid var(--border);
-  transition: top 0.15s;
-}
-
-.filter-bar.has-highlight {
-  top: calc(var(--top-bar-height) + 44px + 40px);
-}
-
-.filter-scroll {
+/* ── Filters Button ─────────────────────── */
+.filters-btn {
   display: flex;
-  gap: 8px;
-  padding: 10px 16px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  max-width: 640px;
-  margin: 0 auto;
-}
-
-.filter-scroll::-webkit-scrollbar {
-  display: none;
-}
-
-.filter-chip {
-  flex-shrink: 0;
-  padding: 6px 16px;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
   border-radius: 20px;
   border: 2px solid var(--border);
+  background: var(--surface);
   font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  transition: all 0.15s;
-  white-space: nowrap;
   font-weight: 700;
-  background: var(--surface);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
-.filter-chip:hover {
-  border-color: var(--text-muted);
-}
+.filters-btn[hidden] { display: none; }
 
-.filter-chip.active {
+.filters-btn.has-filters {
   background: var(--text);
-  color: var(--surface);
+  color: var(--bg);
   border-color: var(--text);
+}
+
+.filters-btn.has-filters svg path {
+  stroke: var(--bg);
+}
+
+/* ── Filter Panel (dropdown) ────────────── */
+.filter-panel {
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+  padding: 12px 16px 16px;
+  max-width: 640px;
+  margin: 0 auto;
+  animation: panelSlideDown 0.15s ease-out;
+}
+
+@keyframes panelSlideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.filter-panel[hidden] { display: none; }
+
+.filter-section { margin-bottom: 14px; }
+
+.filter-section-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.filter-pill {
+  padding: 6px 12px;
+  border-radius: 16px;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.filter-pill.active {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+}
+
+.filter-pill.suggested {
+  border-color: var(--canada-red);
+  color: var(--canada-red);
+}
+
+.filter-pill.suggested.active {
+  background: var(--canada-red);
+  color: #fff;
+  border-color: var(--canada-red);
+}
+
+.filter-panel-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.filter-action-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.filter-action-btn.clear {
+  background: var(--bg);
+  color: var(--text-muted);
+  border: 1.5px solid var(--border);
+}
+
+.filter-action-btn.apply {
+  background: var(--text);
+  color: var(--bg);
 }
 
 /* ============================================
@@ -566,29 +654,24 @@ input {
    ============================================ */
 .content-area {
   position: fixed;
-  top: calc(var(--top-bar-height) + 40px + var(--filter-height));
+  top: var(--top-bar-height);
   left: 0;
   right: 0;
   bottom: var(--nav-height);
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .content-area.has-highlight {
-  top: calc(var(--top-bar-height) + 44px + 40px + var(--filter-height));
-}
-
-.content-area.no-filters {
-  top: calc(var(--top-bar-height) + 40px);
+  top: calc(var(--top-bar-height) + 44px);
 }
 
 /* ============================================
    List View
    ============================================ */
 .list-view {
-  height: 100%;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
+  max-width: 640px;
+  margin: 0 auto;
 }
 
 .event-list {

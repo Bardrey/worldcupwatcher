@@ -10,19 +10,20 @@
     favouriteTeam: null,
     currentTab: 'upcoming',
     currentView: 'list',
-    currentFilter: 'all',
+    typeFilters: [],
+    countryFilters: [],
     map: null,
     markers: [],
     shareEventId: null,
     savedEvents: [],
-    cookieConsent: null, // null = not asked, true = accepted, false = declined
-    teamFilter: false,
-    matchFilter: null,       // matchId to filter upcoming events
-    fixturesSubTab: 'matches', // 'matches' or 'standings'
+    cookieConsent: null,
+    matchFilter: null,
+    fixturesSubTab: 'matches',
     mapTodayOnly: false,
     userLocation: null,
     userMarker: null,
     selectedCity: localStorage.getItem('wcw_city') || 'london',
+    filterPanelOpen: false,
   };
 
   // ── Helpers ────────────────────────────────
@@ -147,7 +148,13 @@
   const $btnOpenMap = document.getElementById('btn-open-map');
   const $btnCloseMap = document.getElementById('btn-close-map');
   const $citySelect = document.getElementById('city-select');
-  const $cityBar = document.querySelector('.city-bar');
+  const $subHeader = document.getElementById('sub-header');
+  const $subTitle = document.getElementById('sub-title');
+  const $subControls = document.getElementById('sub-controls');
+  const $filtersBtn = document.getElementById('filters-btn');
+  const $filtersBtnLabel = document.getElementById('filters-btn-label');
+  const $filterPanel = document.getElementById('filter-panel');
+  const $countryFilters = document.getElementById('country-filters');
 
   // ── City Selector ─────────────────────────
   $citySelect.value = state.selectedCity;
@@ -297,14 +304,88 @@
     renderMapMarkers();
   });
 
-  // ── Filter Chips ───────────────────────────
-  document.querySelectorAll('.filter-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      state.currentFilter = chip.dataset.filter;
-      renderCurrentTab();
+  // ── Filter Panel ────────────────────────────
+  function populateCountryFilters() {
+    const countries = TEAMS_2026.map(t => ({ code: t.code, name: t.name, flag: t.flag }));
+    countries.sort((a, b) => a.name.localeCompare(b.name));
+    $countryFilters.innerHTML = countries.map(c => {
+      const isSuggested = state.favouriteTeam && c.code === state.favouriteTeam;
+      const isActive = state.countryFilters.includes(c.code);
+      return `<button class="filter-pill${isActive ? ' active' : ''}${isSuggested ? ' suggested' : ''}" data-country="${c.code}">${c.flag} ${c.name}</button>`;
+    }).join('');
+  }
+
+  function toggleFilterPanel() {
+    state.filterPanelOpen = !state.filterPanelOpen;
+    $filterPanel.hidden = !state.filterPanelOpen;
+    if (state.filterPanelOpen) {
+      populateCountryFilters();
+      syncFilterPillStates();
+    }
+  }
+
+  function syncFilterPillStates() {
+    $filterPanel.querySelectorAll('#type-filters .filter-pill').forEach(pill => {
+      pill.classList.toggle('active', state.typeFilters.includes(pill.dataset.filter));
     });
+    $filterPanel.querySelectorAll('#country-filters .filter-pill').forEach(pill => {
+      pill.classList.toggle('active', state.countryFilters.includes(pill.dataset.country));
+    });
+  }
+
+  function updateFiltersBtnState() {
+    const count = state.typeFilters.length + state.countryFilters.length;
+    if (count > 0) {
+      $filtersBtn.classList.add('has-filters');
+      $filtersBtnLabel.textContent = `Filters (${count})`;
+    } else {
+      $filtersBtn.classList.remove('has-filters');
+      $filtersBtnLabel.textContent = 'Filters';
+    }
+  }
+
+  $filtersBtn.addEventListener('click', toggleFilterPanel);
+
+  $filterPanel.addEventListener('click', (e) => {
+    const pill = e.target.closest('.filter-pill');
+    if (!pill) return;
+    if (pill.dataset.filter) {
+      const f = pill.dataset.filter;
+      if (state.typeFilters.includes(f)) {
+        state.typeFilters = state.typeFilters.filter(x => x !== f);
+      } else {
+        state.typeFilters.push(f);
+      }
+      pill.classList.toggle('active');
+    } else if (pill.dataset.country) {
+      const c = pill.dataset.country;
+      if (state.countryFilters.includes(c)) {
+        state.countryFilters = state.countryFilters.filter(x => x !== c);
+      } else {
+        state.countryFilters.push(c);
+      }
+      pill.classList.toggle('active');
+    }
+  });
+
+  document.getElementById('filters-apply').addEventListener('click', () => {
+    state.filterPanelOpen = false;
+    $filterPanel.hidden = true;
+    updateFiltersBtnState();
+    renderCurrentTab();
+  });
+
+  document.getElementById('filters-clear').addEventListener('click', () => {
+    state.typeFilters = [];
+    state.countryFilters = [];
+    syncFilterPillStates();
+    updateFiltersBtnState();
+  });
+
+  // ── Scroll-based compact sub-header ────────
+  $contentArea.addEventListener('scroll', () => {
+    const scrolled = $contentArea.scrollTop > 40;
+    $subHeader.classList.toggle('compact', scrolled);
   });
 
   // ── Bottom Nav ─────────────────────────────
@@ -324,33 +405,39 @@
   // ── Filtering & Sorting ────────────────────
   function getFilteredEvents() {
     let events = EVENTS.filter(e => e.city === state.selectedCity);
-    const filter = state.currentFilter;
 
-    if (filter === 'free') events = events.filter(e => e.type === 'free');
-    else if (filter === 'ticketed') events = events.filter(e => e.type === 'ticketed');
-    else if (filter === 'fan-zone') events = events.filter(e => e.vibe === 'Fan Zone');
-    else if (filter === 'pub') events = events.filter(e => e.vibe === 'Pub');
-    else if (filter === 'rooftop') events = events.filter(e => e.vibe === 'Rooftop');
-    else if (filter === 'outdoor') events = events.filter(e => e.vibe === 'Outdoor');
+    // Type filters
+    if (state.typeFilters.length > 0) {
+      events = events.filter(e => {
+        return state.typeFilters.some(f => {
+          if (f === 'free') return e.type === 'free';
+          if (f === 'ticketed') return e.type === 'ticketed';
+          if (f === 'fan-zone') return e.vibe === 'Fan Zone';
+          if (f === 'pub') return e.vibe === 'Pub';
+          if (f === 'rooftop') return e.vibe === 'Rooftop';
+          if (f === 'outdoor') return e.vibe === 'Outdoor';
+          return false;
+        });
+      });
+    }
+
+    // Country filters
+    if (state.countryFilters.length > 0) {
+      events = events.filter(e => {
+        const match = getMatch(e.matchId);
+        if (!match) return false;
+        return state.countryFilters.includes(match.teamA) || state.countryFilters.includes(match.teamB);
+      });
+    }
 
     if (state.currentTab === 'upcoming') {
       if (state.matchFilter) {
         events = events.filter(e => e.matchId === state.matchFilter);
-      } else if (state.teamFilter && state.favouriteTeam) {
-        events = events.filter(e => eventMatchesTeam(e, state.favouriteTeam));
       }
-      events.sort((a, b) => {
-        const da = new Date(a.date + 'T' + a.time);
-        const db = new Date(b.date + 'T' + b.time);
-        return da - db;
-      });
+      events.sort((a, b) => new Date(a.date + 'T' + a.time) - new Date(b.date + 'T' + b.time));
     } else if (state.currentTab === 'favourites') {
       events = events.filter(e => state.savedEvents.includes(e.id));
-      events.sort((a, b) => {
-        const da = new Date(a.date + 'T' + a.time);
-        const db = new Date(b.date + 'T' + b.time);
-        return da - db;
-      });
+      events.sort((a, b) => new Date(a.date + 'T' + a.time) - new Date(b.date + 'T' + b.time));
     }
 
     return events;
@@ -360,7 +447,6 @@
   function renderEventList() {
     const events = getFilteredEvents();
 
-    // Always build the tab header first so the toggle is always visible
     let html = '';
     let lastDate = '';
 
@@ -371,14 +457,6 @@
       html += `<div class="tab-header">
         <span>${teamA?.flag || ''} ${teamA?.name || ''} vs ${teamB?.name || ''} ${teamB?.flag || ''}</span>
         <button class="clear-filter-btn" id="clear-match-filter">✕ Clear</button>
-      </div>`;
-    } else if (state.currentTab === 'upcoming' && state.favouriteTeam) {
-      const team = getTeam(state.favouriteTeam);
-      html += `<div class="tab-header">UPCOMING
-        <label class="team-toggle">
-          <input type="checkbox" id="team-only-toggle" ${state.teamFilter ? 'checked' : ''}>
-          <span class="toggle-label">${team?.flag || ''} ${team?.name || 'My team'}</span>
-        </label>
       </div>`;
     } else if (state.currentTab === 'favourites') {
       html += `<div class="tab-header">YOUR FAVOURITES<span class="tab-count">${events.length} saved</span></div>`;
@@ -397,12 +475,6 @@
         $noResults.innerHTML = `
           <p>NO SCREENINGS</p>
           <span>No venues are screening this match yet</span>
-        `;
-      } else if (state.currentTab === 'upcoming' && state.teamFilter && state.favouriteTeam) {
-        const team = getTeam(state.favouriteTeam);
-        $noResults.innerHTML = `
-          <p>NO ${team?.name?.toUpperCase() || 'TEAM'} EVENTS</p>
-          <span>No screenings found for ${team?.flag || ''} ${team?.name || 'your team'} with current filters</span>
         `;
       } else {
         $noResults.innerHTML = '<p>NO EVENTS FOUND</p><span>Try changing your filters</span>';
@@ -488,13 +560,6 @@
   }
 
   function bindUpcomingControls() {
-    const teamToggle = document.getElementById('team-only-toggle');
-    if (teamToggle) {
-      teamToggle.addEventListener('change', () => {
-        state.teamFilter = teamToggle.checked;
-        renderCurrentTab();
-      });
-    }
     const clearBtn = document.getElementById('clear-match-filter');
     if (clearBtn) {
       clearBtn.addEventListener('click', () => {
@@ -697,16 +762,12 @@
 
   // ── Match Highlight Banner ─────────────────
   function updateMatchHighlight() {
-    const $filterBar = document.querySelector('.filter-bar');
     if (!state.favouriteTeam) {
       $matchHighlight.hidden = true;
       $contentArea.classList.remove('has-highlight');
-      $filterBar.classList.remove('has-highlight');
-      $cityBar.classList.remove('has-highlight');
       return;
     }
 
-    const team = getTeam(state.favouriteTeam);
     const now = new Date();
     const nextMatch = MATCHES
       .filter(m => m.teamA === state.favouriteTeam || m.teamB === state.favouriteTeam)
@@ -716,8 +777,6 @@
     if (!nextMatch) {
       $matchHighlight.hidden = true;
       $contentArea.classList.remove('has-highlight');
-      $filterBar.classList.remove('has-highlight');
-      $cityBar.classList.remove('has-highlight');
       return;
     }
 
@@ -730,8 +789,6 @@
 
     $matchHighlight.hidden = false;
     $contentArea.classList.add('has-highlight');
-    $filterBar.classList.add('has-highlight');
-    $cityBar.classList.add('has-highlight');
   }
 
   // ── Team Badge ─────────────────────────────
@@ -879,24 +936,35 @@
 
   // ── Render Router ──────────────────────────
   function renderCurrentTab() {
-    const $filterBar = document.querySelector('.filter-bar');
+    // Close filter panel on tab switch
+    state.filterPanelOpen = false;
+    $filterPanel.hidden = true;
+
     if (state.currentTab === 'fixtures') {
-      $filterBar.hidden = true;
+      $subTitle.textContent = 'FIXTURES';
+      $subControls.hidden = true;
       $matchHighlight.hidden = true;
       $btnOpenMap.hidden = true;
       $contentArea.classList.remove('has-highlight');
-      $cityBar.classList.remove('has-highlight');
-      $contentArea.classList.add('no-filters');
       renderFixtures();
       const scrollTarget = document.getElementById('fixture-scroll-target');
       if (scrollTarget) {
         scrollTarget.scrollIntoView({ block: 'start' });
       }
-    } else {
-      $filterBar.hidden = false;
+    } else if (state.currentTab === 'favourites') {
+      $subTitle.textContent = 'FAVOURITES';
+      $subControls.hidden = false;
+      $filtersBtn.hidden = true;
       $btnOpenMap.hidden = false;
-      $contentArea.classList.remove('no-filters');
       updateMatchHighlight();
+      renderEventList();
+    } else {
+      $subTitle.textContent = 'UPCOMING';
+      $subControls.hidden = false;
+      $filtersBtn.hidden = false;
+      $btnOpenMap.hidden = false;
+      updateMatchHighlight();
+      updateFiltersBtnState();
       renderEventList();
     }
   }

@@ -71,36 +71,53 @@
     </div>
   </div>
 
-  <!-- City Selector -->
-  <div class="city-bar">
-    <select id="city-select" class="city-select">
-      <option value="london">London</option>
-      <option value="manchester">Manchester</option>
-      <option value="birmingham">Birmingham</option>
-      <option value="glasgow">Glasgow</option>
-      <option value="edinburgh">Edinburgh</option>
-      <option value="liverpool">Liverpool</option>
-      <option value="leeds">Leeds</option>
-      <option value="bristol">Bristol</option>
-      <option value="newcastle">Newcastle</option>
-    </select>
-  </div>
-
-  <!-- Filter Bar -->
-  <div class="filter-bar">
-    <div class="filter-scroll">
-      <button class="filter-chip active" data-filter="all">All</button>
-      <button class="filter-chip" data-filter="free">Free</button>
-      <button class="filter-chip" data-filter="ticketed">Ticketed</button>
-      <button class="filter-chip" data-filter="fan-zone">Fan Zones</button>
-      <button class="filter-chip" data-filter="pub">Pubs</button>
-      <button class="filter-chip" data-filter="rooftop">Rooftops</button>
-      <button class="filter-chip" data-filter="outdoor">Outdoor</button>
-    </div>
-  </div>
-
   <!-- Content Area -->
   <main id="content-area" class="content-area">
+    <!-- Sticky sub-header (rendered by JS per tab) -->
+    <div id="sub-header" class="sub-header">
+      <h2 id="sub-title" class="sub-title">UPCOMING</h2>
+      <div id="sub-controls" class="sub-controls">
+        <select id="city-select" class="city-select">
+          <option value="london">London</option>
+          <option value="manchester">Manchester</option>
+          <option value="birmingham">Birmingham</option>
+          <option value="glasgow">Glasgow</option>
+          <option value="edinburgh">Edinburgh</option>
+          <option value="liverpool">Liverpool</option>
+          <option value="leeds">Leeds</option>
+          <option value="bristol">Bristol</option>
+          <option value="newcastle">Newcastle</option>
+        </select>
+        <button id="filters-btn" class="filters-btn">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 2h12M3 7h8M5 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span id="filters-btn-label">Filters</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter Panel (hidden dropdown) -->
+    <div id="filter-panel" class="filter-panel" hidden>
+      <div class="filter-section">
+        <span class="filter-section-label">TYPE</span>
+        <div class="filter-options" id="type-filters">
+          <button class="filter-pill" data-filter="free">Free</button>
+          <button class="filter-pill" data-filter="ticketed">Ticketed</button>
+          <button class="filter-pill" data-filter="fan-zone">Fan Zones</button>
+          <button class="filter-pill" data-filter="pub">Pubs</button>
+          <button class="filter-pill" data-filter="outdoor">Outdoor</button>
+          <button class="filter-pill" data-filter="rooftop">Rooftops</button>
+        </div>
+      </div>
+      <div class="filter-section">
+        <span class="filter-section-label">COUNTRY</span>
+        <div class="filter-options" id="country-filters"></div>
+      </div>
+      <div class="filter-panel-actions">
+        <button id="filters-clear" class="filter-action-btn clear">Clear all</button>
+        <button id="filters-apply" class="filter-action-btn apply">Show results</button>
+      </div>
+    </div>
+
     <div id="list-view" class="list-view">
       <div id="event-list" class="event-list"></div>
       <div id="no-results" class="no-results" hidden>
